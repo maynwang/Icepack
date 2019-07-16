@@ -6,10 +6,11 @@
 !
       module icedrv_forcing
 
+      use gemdrv_get_forcing
       use icedrv_kinds
       use icedrv_domain_size, only: nx
       use icedrv_calendar, only: time, nyr, dayyr, mday, month, secday
-      use icedrv_calendar, only: daymo, daycal, dt, yday, sec
+      use icedrv_calendar, only: daymo, daycal, dt, yday, sec, npt
       use icedrv_constants, only: nu_diag, nu_forcing, nu_open_clos
       use icedrv_constants, only: c0, c1, c2, c10, c100, p5, c4, c24
       use icepack_intfc, only: icepack_warnings_flush, icepack_warnings_aborted
@@ -86,12 +87,6 @@
       character(char_len_long), public :: & 
          data_dir           ! top directory for forcing data
 
-      real (kind=dbl_kind), parameter, public :: &
-         frcvdr = 0.28_dbl_kind, & ! frac of incoming sw in vis direct band
-         frcvdf = 0.24_dbl_kind, & ! frac of incoming sw in vis diffuse band
-         frcidr = 0.31_dbl_kind, & ! frac of incoming sw in near IR direct band
-         frcidf = 0.17_dbl_kind    ! frac of incoming sw in near IR diffuse band
-
       logical (kind=log_kind), public :: &
          oceanmixed_ice        , & ! if true, use internal ocean mixed layer
          restore_ocn               ! restore sst if true
@@ -157,6 +152,7 @@
       if (trim(atm_data_type(1:4)) == 'clim')  call atm_climatological
       if (trim(atm_data_type(1:5)) == 'ISPOL') call atm_ISPOL
       if (trim(atm_data_type(1:4)) == 'NICE')  call atm_NICE
+      if (trim(atm_data_type(1:3)) == 'GEM')   call atm_GEM
       if (trim(ocn_data_type(1:5)) == 'SHEBA') call ice_open_clos
 
       if (restore_ocn) then
@@ -201,7 +197,8 @@
       integer (kind=int_kind) :: &
          i            , & ! data index
          recslot      , & ! spline slot for current record
-         midmonth         ! middle day of month
+         midmonth     , & ! middle day of month
+         nptgem           ! number of forcing steps in GEM
 
       integer (kind=int_kind) :: &
          mlast, mnext     ! indices of bracketing time slices
@@ -219,7 +216,8 @@
       real (kind=dbl_kind) :: &
           sec6hr      , & ! number of seconds in 6 hours
           sec1hr      , & ! number of seconds in 1 hour
-          offset          ! time to first data record since 1 Jan (s)
+          offset      , & ! time to first data record since 1 Jan (s)
+          dt_gem	  ! time interval between 2 GEM data 
 
       character(len=*), parameter :: subname='(get_forcing)'
 
@@ -375,6 +373,35 @@
         flw  (:) = c1intp *   flw_data(mlast) + c2intp *   flw_data(mnext)
 
          ! derived
+         swvdr(:) = c1intp * swvdr_data(mlast) + c2intp * swvdr_data(mnext)
+         swvdf(:) = c1intp * swvdf_data(mlast) + c2intp * swvdf_data(mnext)
+         swidr(:) = c1intp * swidr_data(mlast) + c2intp * swidr_data(mnext)
+         swidf(:) = c1intp * swidf_data(mlast) + c2intp * swidf_data(mnext)
+
+      elseif (trim(atm_data_type) == 'GEM') then
+	print *, 'getting the forcing for the time step i : ', timestep
+
+	 i = mod(timestep-1,ntime)+1 ! repeat forcing cycle
+         mlast = i
+         mnext = mlast
+         c1intp = c1
+         c2intp = c0
+	
+         Tair (:) = c1intp *  Tair_data(mlast) + c2intp *  Tair_data(mnext)
+         Qa   (:) = c1intp *    Qa_data(mlast) + c2intp *    Qa_data(mnext)
+         uatm (:) = c1intp *  uatm_data(mlast) + c2intp *  uatm_data(mnext)
+         vatm (:) = c1intp *  vatm_data(mlast) + c2intp *  vatm_data(mnext)
+         fsnow(:) = c1intp * fsnow_data(mlast) + c2intp * fsnow_data(mnext)
+         flw  (:) = c1intp *   flw_data(mlast) + c2intp *   flw_data(mnext)
+         fsw  (:) = c1intp *   fsw_data(mlast) + c2intp *   fsw_data(mnext)
+
+         ! derived (or not otherwise set)
+         potT (:) = c1intp *  potT_data(mlast) + c2intp *  potT_data(mnext)
+         wind (:) = c1intp *  wind_data(mlast) + c2intp *  wind_data(mnext)
+         strax(:) = c1intp * strax_data(mlast) + c2intp * strax_data(mnext)
+         stray(:) = c1intp * stray_data(mlast) + c2intp * stray_data(mnext)
+         rhoa (:) = c1intp *  rhoa_data(mlast) + c2intp *  rhoa_data(mnext)
+         frain(:) = c1intp * frain_data(mlast) + c2intp * frain_data(mnext)
          swvdr(:) = c1intp * swvdr_data(mlast) + c2intp * swvdr_data(mnext)
          swvdf(:) = c1intp * swvdf_data(mlast) + c2intp * swvdf_data(mnext)
          swidr(:) = c1intp * swidr_data(mlast) + c2intp * swidr_data(mnext)
@@ -714,8 +741,11 @@
          fsnow(nt) = fsnow(nt) * precip_factor
 
          ! determine whether precip is rain or snow
-         ! HadGEM forcing provides separate snowfall and rainfall rather 
+         ! HadGEM and GEM forcing provides separate snowfall and rainfall rather 
          ! than total precipitation
+         
+       if (trim(atm_data_type) /= 'GEM') then
+         
 !         if (trim(atm_data_type) /= 'hadgem') then
             frain(nt) = c0                     
             if (Tair(nt) >= Tffresh) then
@@ -730,6 +760,8 @@
             stray(nt) = c0
          ! else  ! strax, stray, wind are read from files
          endif                   ! calc_strair
+         
+	endif
 
       enddo ! ntime
 
@@ -968,6 +1000,38 @@
 
       end subroutine atm_NICE
 
+!=======================================================================
+
+      subroutine atm_GEM
+      use read_buoy_data
+      ! there is data for 366 days, but we only use 365
+
+      integer (kind=int_kind) ::  i !, nptgem        ! index
+
+      call prepare_gem_forcing(idate0,npt,lat_buoy,lon_buoy)
+      do i = 1, npt
+         Tair_data (i) = Tair_col (i)
+         Qa_data   (i) = Qa_col   (i)
+         uatm_data (i) = uatm_col (i)
+         vatm_data (i) = vatm_col (i)
+         fsnow_data(i) = fsnow_col(i)
+          zlvl_data(i) = zlvl_col (i)    ! atmospheric data level (m)
+          potT_data(i) = potT_col (i)    ! air potential temperature  (K)
+          rhoa_data(i) = rhoa_col (i)    ! air density (kg/m^3)  
+          wind_data(i) = wind_col (i)    ! wind speed (m/s)
+         strax_data(i) = c0    ! wind stress components (N/m^2)
+         stray_data(i) = c0   
+         fsw_data(i) = fsw_col  (i)    ! incoming shortwave radiation (W/m^2)
+         swvdr_data(i) = swvdr_col(i)    ! sw down, visible, direct  (W/m^2)
+         swvdf_data(i) = swvdf_col(i)    ! sw down, visible, diffuse (W/m^2)
+         swidr_data(i) = swidr_col(i)    ! sw down, near IR, direct  (W/m^2)
+         swidf_data(i) = swidf_col(i)    ! sw down, near IR, diffuse (W/m^2)
+           flw_data(i) = flw_col  (i)    ! incoming longwave radiation (W/m^2)
+         frain_data(i) = frain_col(i)    ! rainfall rate (kg/m^2 s)
+      enddo 
+      
+      end subroutine atm_GEM
+      
 !=======================================================================
 
       subroutine ocn_NICE

@@ -40,8 +40,8 @@ NETCDF_PATH := /fs/ssm/hpco/tmp/eccc/201402/04/intel-2016.1.150/ubuntu-14.04-amd
 
 PIO_CONFIG_OPTS:= --enable-filesystem-hints=gpfs 
 
-#PNETCDF_PATH := $(PNETCDF)
-#PNETCDF_PATH := /glade/u/apps/ch/opt/pio/2.2/mpt/2.15f/intel/17.0.1/lib
+PNETCDF_PATH := $(PNETCDF)
+PNETCDF_PATH := /glade/u/apps/ch/opt/pio/2.2/mpt/2.15f/intel/17.0.1/lib
 
 INCLDIR := $(INCLDIR)
 
@@ -51,6 +51,9 @@ LIB_MPI := $(IMPILIBDIR)
 
 #SLIBS   := -L$(LIB_NETCDF) -lnetcdff -lnetcdf -L$(LIB_PNETCDF) -lpnetcdf -lgptl
 SLIBS   := -L$(LIB_NETCDF) -lnetcdff -lnetcdf
+
+LIB_RMN := /ssm/net/rpn/libs/16.2/librmn-intel-2016.1.156_016.2_ubuntu-14.04-amd64-64/lib/Linux_x86-64/intel-2016.1.156
+SLIBS   := -L$(LIB_RMN) -lrmn_016.2
 
 ifeq ($(compile_threaded), true) 
    LDFLAGS += -openmp 
