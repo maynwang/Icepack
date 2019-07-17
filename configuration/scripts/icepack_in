@@ -83,6 +83,7 @@
     atmbndy         = 'default'
     calc_strair     = .true.
     calc_Tsfc       = .true.
+    init_SIMBA      = .true.
     highfreq        = .false.
     natmiter        = 5
     atmiter_conv    = 0.0d0
@@ -99,12 +100,13 @@
     trestore        = 90
     precip_units    = 'mks'
     default_season  = 'spring'
-    atm_data_type   = 'clim'
+    atm_data_type   = 'GEM'
     ocn_data_type   = 'SHEBA'
     bgc_data_type   = 'default'
-    fyear_init      = 2015
+    fyear_init      = 2017
     ycycle          = 1
     data_dir        = '/users/dor/armn/map/store/data/Icepack_data/forcing'
+    data_buoy_dir   = '/users/dor/armn/map/store/data/SIMBA_data/gca0101td2017020219'
     atm_data_file   = 'unknown_atm_data_file'
     ocn_data_file   = 'unknown_ocn_data_file'
     bgc_data_file   = 'unknown_bgc_data_file'
