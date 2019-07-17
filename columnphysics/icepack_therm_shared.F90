@@ -31,6 +31,7 @@
                 dsurface_heat_flux_dTsf, &
                 icepack_init_thermo, &
                 icepack_init_trcr, &
+                icepack_init_trcr_SIMBA, & 
                 icepack_ice_temperature, &
                 icepack_snow_temperature, &
                 icepack_liquidus_temperature, &
@@ -353,6 +354,74 @@
 !=======================================================================
 !autodocument_start icepack_liquidus_temperature
 ! compute liquidus temperature
+
+      subroutine icepack_init_trcr_SIMBA(Tair,     Tf,       &
+                                  Sprofile, Tprofile, &
+                                  Tsfc,  Tni,             &
+                                  nilyr,    nslyr,    &
+                                  qin,      qsn)
+
+      integer (kind=int_kind), intent(in) :: &
+         nilyr, &    ! number of ice layers
+         nslyr       ! number of snow layers
+
+      real (kind=dbl_kind), intent(in) :: &
+         Tair, &     ! air temperature (C)
+         Tf          ! freezing temperature (C)
+
+      real (kind=dbl_kind), dimension(:), intent(in) :: &
+         Sprofile, & ! vertical salinity profile (ppt)
+         Tprofile, & ! vertical temperature profile (C)
+         Tni
+         
+      real (kind=dbl_kind), intent(out) :: &
+         Tsfc        ! surface temperature (C)
+
+      real (kind=dbl_kind), dimension(:), intent(out) :: &
+         qin, &      ! ice enthalpy profile (J/m3)
+         qsn         ! snow enthalpy profile (J/m3)
+
+      ! local variables
+
+      integer (kind=int_kind) :: k
+
+      character(len=*),parameter :: subname='(icepack_init_trcr_SIMBA)'
+
+      ! surface temperature
+      Tsfc = Tf ! default
+      if (calc_Tsfc) Tsfc = min(Tsmelt, Tair) ! deg C
+      
+      if (heat_capacity) then
+        
+        ! ice enthalpy
+        do k = 1, nilyr
+
+          if (ktherm == 2) then
+            qin(k) = enthalpy_mush(Tni(k), Sprofile(k))
+          else
+            qin(k) = -(rhoi * (cp_ice*(Tprofile(k)-Tni(k)) &
+                + Lfresh*(c1-Tprofile(k)/Tni(k)) - cp_ocn*Tprofile(k)))
+          endif
+        enddo               ! nilyr
+        
+        ! snow enthalpy
+        do k = 1, nslyr
+          qsn(k) = -rhos*(Lfresh - cp_ice*Tni(k))
+        enddo               ! nslyr
+        
+      else  ! one layer with zero heat capacity
+        
+        ! ice energy
+        qin(1) = -rhoi * Lfresh 
+        
+        ! snow energy
+        qsn(1) = -rhos * Lfresh 
+        
+      endif               ! heat_capacity
+      
+    end subroutine icepack_init_trcr_SIMBA   
+    
+!=======================================================================
 
       function icepack_liquidus_temperature(Sin) result(Tmlt)
 

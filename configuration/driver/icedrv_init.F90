@@ -15,7 +15,7 @@
       use icepack_intfc, only: icepack_init_tracer_flags
       use icepack_intfc, only: icepack_init_tracer_sizes
       use icepack_intfc, only: icepack_init_tracer_indices
-      use icepack_intfc, only: icepack_init_trcr
+      use icepack_intfc, only: icepack_init_trcr, icepack_init_trcr_SIMBA
       use icepack_intfc, only: icepack_query_parameters
       use icepack_intfc, only: icepack_query_tracer_flags
       use icepack_intfc, only: icepack_query_tracer_sizes
@@ -1368,32 +1368,34 @@
           hinit(ncat) = hi
         endif
       
-      do n = 1, ncat
-         ! ice volume, snow volume
-         aicen(i,n) = ainit(n)
-         vicen(i,n) = hinit(n) * ainit(n) ! m
-         vsnon(i,n) = min(aicen(i,n)*hsno_init,p2*vicen(i,n))
-         ! tracers
-         call icepack_init_trcr(Tair  (i  ), Tf   (i  ), &
+        do n = 1, ncat
+           ! ice volume, snow volume
+           aicen(i,n) = ainit(n)
+           vicen(i,n) = hinit(n) * ainit(n) ! m
+           vsnon(i,n) = hs*ainit(n) !min(aicen(i,n)*hs,p2*vicen(i,n))
+           print *, 'volume is = ', vsnon(i,n)
+           print *, 'area is = ', ainit
+           ! tracers
+           call icepack_init_trcr_SIMBA(Tair_buoy(i), Tf   (i  ), &
                                 salinz(i,:), Tmltz(i,:), &
-                                Tsfc,                    &
+                                Tsfc, Tni,                   &
                                 nilyr,       nslyr,      &
                                 qin   (  :), qsn  (  :))
         
-         ! surface temperature
-         trcrn(i,nt_Tsfc,n) = Tsfc ! deg C
-         ! ice enthalpy, salinity 
-         do k = 1, nilyr
+           ! surface temperature
+           trcrn(i,nt_Tsfc,n) = Tsfc ! deg C
+           ! ice enthalpy, salinity 
+           do k = 1, nilyr
             trcrn(i,nt_qice+k-1,n) = qin(k)
             trcrn(i,nt_sice+k-1,n) = salinz(i,k)
-         enddo
-         ! snow enthalpy
-         do k = 1, nslyr
-            trcrn(i,nt_qsno+k-1,n) = qsn(k)
-         enddo               ! nslyr
-         ! brine fraction
-         if (tr_brine) trcrn(i,nt_fbri,n) = c1
-      enddo 
+           enddo
+           ! snow enthalpy
+           do k = 1, nslyr
+              trcrn(i,nt_qsno+k-1,n) = qsn(k)
+           enddo               ! nslyr
+           ! brine fraction
+           if (tr_brine) trcrn(i,nt_fbri,n) = c1
+        enddo 
         
 !        print *, 'Tair_buoy = ', Tair_buoy
 !        print *, 'Tf = ', Tf       
