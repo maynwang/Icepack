@@ -31,24 +31,22 @@ module gemdrv_get_forcing
 
  contains      
       
-      SUBROUTINE prepare_gem_forcing(idate0,npt,lat_col, lon_col)
+      SUBROUTINE prepare_gem_forcing(idate0,npt,lat_col, lon_col,GEM_rpn_list)
            integer, intent(in) :: idate0, npt 
            real (kind=dbl_kind), intent(in) :: lat_col, lon_col	   
-
+           character*512 GEM_rpn_list
           
       call alloc_col_forcing(npt)
 	DO kt = 1, npt
 
-          call atm_blk_rpn( kt )
-	    print *, 'END ATM_BLK_RPN'
-	    print *, 'Going into prep-cice'
+          call load_data( kt,GEM_rpn_list )
 	  call prepare_cice_sfc(kt)
-	print *, 'Getting the position'  
+
 	IF (kt .eq. 1) then 
 	   call get_col_position(lat_col,lon_col,i_col,j_col)
 	   print *, lat_col,lon_col,i_col,j_col
 	ENDIF
-	print *, 'writing into the column vector'
+
 	  call prep_col_forcing(i_col,j_col,kt)
 	  
 	ENDDO

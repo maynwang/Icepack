@@ -76,7 +76,7 @@ MODULE gemdrv_read_rpn
 
 CONTAINS
 
-   SUBROUTINE fld_read_rpn( kt, kn_fsbc, sd )
+   SUBROUTINE fld_read_rpn( kt, kn_fsbc, sd, GEM_rpn_list )
       implicit none
       !!---------------------------------------------------------------------
       !!                    ***  ROUTINE fld_read_rpn  ***
@@ -99,7 +99,8 @@ CONTAINS
       !!
       INTEGER  ::   jf         ! dummy indices
       INTEGER  ::   ios        ! namelist error control
-
+      
+      character*512 GEM_rpn_list
       !!---------------------------------------------------------------------
 
       IF( kt == 1 ) THEN
@@ -110,7 +111,7 @@ CONTAINS
         ENDDO
         
         kt_sbc=kt-1	
-        call init_atm (sd) ! get the initial forcing for step 0
+        call init_atm (sd, GEM_rpn_list) ! get the initial forcing for step 0
         
       ENDIF
 
@@ -122,12 +123,13 @@ CONTAINS
 
       
       
-      SUBROUTINE init_atm (sd)
+      SUBROUTINE init_atm (sd, GEM_rpn_list)
       implicit none
       
       TYPE(FLD), INTENT(inout), DIMENSION(:) ::   sd
       integer yy,mo,dd,hh,mm,ss,dum
       character*16 datev
+      character*512 GEM_rpn_list
       real*8  dayfrac,one,sid,rsid
       parameter(one=1.0d0, sid=86400.0d0, rsid=one/sid)
 
@@ -139,7 +141,7 @@ CONTAINS
         print *, 'we get the Mod_runstrt_S : ', Mod_runstrt_S
         print *, 'Going into atmopenf, with ksbc : ', kt_sbc
 
-      call atm_openf
+      call atm_openf(GEM_rpn_list)
       dayfrac = dble(kt_sbc)*dt*rsid ! current timestep into seconds from sim start      
       call incdatsd  (datev,Mod_runstrt_S,dayfrac) !getting the date of current time
       call prsdate   (yy,mo,dd,hh,mm,ss,dum,datev,1) !from date string to yy,mm,etc
@@ -152,12 +154,12 @@ CONTAINS
       
       
    
-      SUBROUTINE atm_openf
+      SUBROUTINE atm_openf(GEM_rpn_list)
       implicit none
       
       integer maxnfile
       parameter ( maxnfile=1000 )
-      character*512 filename(maxnfile),fn,pwd
+      character*512 filename(maxnfile),fn,pwd,GEM_rpn_list
       integer  fnom,fstouv,fstlnk
       external fnom,fstouv,fstlnk
       integer err,err1,err2,i,cnt,unf,wkoffit
@@ -166,20 +168,25 @@ CONTAINS
       unf       = 0
 	call GETCWD(pwd)
 	print *, trim(pwd)
-      if (fnom(unf,'liste_inputfiles','SEQ+OLD',0).lt.0) then
-       call abort('atm_openf: liste_inputfiles, error fnom')
+
+      if (fnom(unf,GEM_rpn_list,'SEQ+OLD',0).lt.0) then
+       call abort('atm_openf: GEM_atm_forcing.txt, error fnom')
       endif
  77   cnt=cnt+1
       if (cnt.gt.maxnfile) then 
         call abort('atm_openf: maxnfile not large enough ---ABORT---')
       endif
       read (unf, '(a)', end = 9120) filename(cnt)
+
       goto 77
  9120 nfile_std = cnt - 1
       close(unf)
+      print *, nfile_std, ' files'
       do cnt = 1, nfile_std
          fn  = filename(cnt)
+         print *, fn, cnt
          err = wkoffit(fn)
+
          if ((err.ne.1).and.(err.ne.33)) then
             filename(cnt) = '@#$%^&'
          endif

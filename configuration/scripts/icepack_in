@@ -1,10 +1,10 @@
 &setup_nml
     days_per_year  = 365
     use_leap_years = .false.
-    year_init      = 2015
+    year_init      = 2017
     istep0         = 0
     dt             = 3600.0
-    npt            = 8760
+    npt            = 10
     ndtd           = 1
     ice_ic         = 'default'
     restart        = .false.
@@ -104,7 +104,7 @@
     bgc_data_type   = 'default'
     fyear_init      = 2015
     ycycle          = 1
-    data_dir        = '/Users/ftuser/Desktop/CICE-Consortium/ICEPACK_DATA/'
+    data_dir        = '/users/dor/armn/map/store/data/Icepack_data/forcing'
     atm_data_file   = 'unknown_atm_data_file'
     ocn_data_file   = 'unknown_ocn_data_file'
     bgc_data_file   = 'unknown_bgc_data_file'

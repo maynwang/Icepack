@@ -7,7 +7,7 @@ MODULE gemdrv_load_forcing
    !! 			            based on code in CONCEPTS : sbcblk_rpn.F90
    !!----------------------------------------------------------------------  
    !!----------------------------------------------------------------------
-   !!   atm_blk_rpn     : Compute the atmospheric fluxes over ice
+   !!   load_data    : Compute the atmospheric fluxes over ice
    !!   test_output_rpn : Make outputs of the computed field.
    !!			  This is only to verify that the data is unchanged
    !!----------------------------------------------------------------------
@@ -76,11 +76,11 @@ MODULE gemdrv_load_forcing
    
 CONTAINS
 
-   SUBROUTINE atm_blk_rpn( kt )
+   SUBROUTINE load_data( kt,GEM_rpn_list)
         implicit none
       !!---------------------------------------------------------------------
-      !!                    ***  ROUTINE atm_blk_rpn  ***
-      !!
+      !!                    ***  ROUTINE load_data  ***
+      !! Based on the routine atm_blk_rpn in the CONCEPTS code
       !! ** Purpose :   provide at each time step the surface atm fluxes
       !!
       !!----------------------------------------------------------------------
@@ -92,7 +92,7 @@ CONTAINS
       INTEGER  ::   jfld        ! dummy loop arguments
       INTEGER  ::   ios         ! Local integer output status for namelist read
       REAL(wp) ::   xmask	! i DO NOT KNOW WHAT IS THIS : LANDMASK??
-
+      character*512 GEM_rpn_list
       !                                         ! ====================== !
       IF( kt == 1 ) THEN                   !  First call kt=nit000  !
          !                                      ! ====================== !
@@ -127,7 +127,7 @@ CONTAINS
          !
       ENDIF
 
-          CALL fld_read_rpn( kt, kt, sf )
+          CALL fld_read_rpn( kt, kt, sf, GEM_rpn_list)
 
       tprecip(:,:)     = sf(jp_prec)%fnow(:,:,1)  !Total precipitation
       sprecip(:,:)     = sf(jp_snow)%fnow(:,:,1)  !Snow precipitation
@@ -149,101 +149,10 @@ CONTAINS
       qlw_ice(:,:,1)   = sf(jp_qlw )%fnow(:,:,1)  !Long wave down
       qsr_ice(:,:,1)   = sf(jp_qsr )%fnow(:,:,1)  !Short wave down
 
-        print *, 'WE NOW HAVE THE VARIABLES FOR KT : ', kt 
-
-! Output the field to verify that the correspondance
-! with the fluxes sent to CICE	
-      IF (kt == 1) call test_output_rpn(kt)
-      IF (kt == 10) call test_output_rpn(kt)
-      
-      
+        print *, 'the data is loaded for timestep : ', kt 
+   
      return
-   END SUBROUTINE atm_blk_rpn
-
-     SUBROUTINE test_output_rpn(kt)
-
-      implicit none
-
-!      type(datetime_type), intent(in) :: date
-
-      character filename*100
-
-      integer, intent(in) :: kt
-      integer i, j, k2
-
-      print *, 'writing data as outputs files'
-      write (filename,'("/home/map005/data/eccc-ppp2/CICE_atm_input/tprecip" &
-                        ,i2.2)') kt
-      open (80, file = filename, status = 'unknown')
-
-      write (filename,'("/home/map005/data/eccc-ppp2/CICE_atm_input/sprecip" &
-                        ,i2.2)') kt
-      open (81, file = filename, status = 'unknown')
-
-      write (filename,'("/home/map005/data/eccc-ppp2/CICE_atm_input/cat_i_rpn" &
-                        ,i2.2)') kt
-      open (82, file = filename, status = 'unknown')
-
-      write (filename,'("/home/map005/data/eccc-ppp2/CICE_atm_input/tatm_ice" &
-                        ,i2.2)') kt
-      open (83, file = filename, status = 'unknown')
-
-      write (filename,'("/home/map005/data/eccc-ppp2/CICE_atm_input/qatm_ice" &
-                        ,i2.2)') kt
-      open (84, file = filename, status = 'unknown')
-
-      write (filename,'("/home/map005/data/eccc-ppp2/CICE_atm_input/zlm_i_rpn" &
-                        ,i2.2)') kt
-      open (85, file = filename, status = 'unknown')
-
-      write (filename,'("/home/map005/data/eccc-ppp2/CICE_atm_input/zlt_i_rpn" &
-                        ,i2.2)') kt
-      open (86, file = filename, status = 'unknown')
-
-      write (filename,'("/home/map005/data/eccc-ppp2/CICE_atm_input/wndi_ice" &
-                        ,i2.2)') kt
-      open (87, file = filename, status = 'unknown')
-
-      write (filename,'("/home/map005/data/eccc-ppp2/CICE_atm_input/wndj_ice" &
-                        ,i2.2)') kt
-      open (88, file = filename, status = 'unknown')
-
-      write (filename,'("/home/map005/data/eccc-ppp2/CICE_atm_input/qlw_ice" &
-                        ,i2.2)') kt
-      open (89, file = filename, status = 'unknown')
-
-      write (filename,'("/home/map005/data/eccc-ppp2/CICE_atm_input/qsr_ice" &
-                        ,i2.2)') kt
-      open (90, file = filename, status = 'unknown')
-
-
-
-      DO j = 1, jpj
-         write(80,100) ( tprecip(i,j),    i = 1, jpi )
-         write(81,100) ( sprecip(i,j),    i = 1, jpi )
-         write(82,200) ( cat_i_rpn(i,j),  i = 1, jpi )
-         write(83,200) ( tatm_ice(i,j),   i = 1, jpi ) 
-	 write(84,100) ( qatm_ice(i,j),   i = 1, jpi )
-         write(85,100) ( zlm_i_rpn(i,j),  i = 1, jpi )
-         write(86,100) ( zlt_i_rpn(i,j),  i = 1, jpi )
-         write(87,100) ( wndi_ice(i,j),   i = 1, jpi )
-         write(88,100) ( wndj_ice(i,j),   i = 1, jpi )
-         write(89,100) ( qlw_ice(i,j,1),  i = 1, jpi )
-         write(90,100) ( qsr_ice(i,j,1),  i = 1, jpi )    
-      ENDDO
-
-      DO k2 = 80, 90
-         close(k2)
-      ENDDO
-
-
-
-100            format (1x, 1000(f20.10, 1x))
-200            format (1x, 1000(f15.10, 1x))
-300            format (1x, 1000(f20.4,  1x))
-      
-      return
-    END SUBROUTINE test_output_rpn
+   END SUBROUTINE load_data
    
 END MODULE gemdrv_load_forcing
 

@@ -1007,8 +1007,17 @@
       ! there is data for 366 days, but we only use 365
 
       integer (kind=int_kind) ::  i !, nptgem        ! index
+      character*512 GEM_rpn_list
+      character*512 GEM_data_file
+      
+      !This is the .txt containing the list of rpn containing GEM data
+      !It is used by fnom to load the forcing data.
+      GEM_data_file = 'GEM_atm_forcing.txt'   
+      GEM_rpn_list = trim(data_dir)//'/GEM/'//trim(GEM_data_file) 
+      
+      call prepare_gem_forcing(idate0,npt,lat_buoy,lon_buoy,GEM_rpn_list)
 
-      call prepare_gem_forcing(idate0,npt,lat_buoy,lon_buoy)
+      
       do i = 1, npt
          Tair_data (i) = Tair_col (i)
          Qa_data   (i) = Qa_col   (i)
@@ -1029,6 +1038,7 @@
            flw_data(i) = flw_col  (i)    ! incoming longwave radiation (W/m^2)
          frain_data(i) = frain_col(i)    ! rainfall rate (kg/m^2 s)
       enddo 
+
       
       end subroutine atm_GEM
       
