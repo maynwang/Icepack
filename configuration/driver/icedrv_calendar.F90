@@ -59,6 +59,9 @@
          month    , & ! month number, 1 to 12
          monthp   , & ! last month
          year_init, & ! initial year
+	 month_init, & ! initial month
+	 day_init,  & ! initial day
+	 hour_init, & ! initial time
          nyr      , & ! year number
          idate    , & ! date (yyyymmdd)
          idate0   , & ! initial date (yyyymmdd)
@@ -159,13 +162,17 @@
       ! Get the time in seconds from calendar zero to start of initial year
       call time2sec(year_init,1,1,basis_seconds)
 
-      ! determine initial date (assumes namelist year_init, istep0 unchanged)     
+      !Get the time in seconds from current time-step to the beginning of the year
+      time = istep0*dt + (daycal(month_init)+ day_init-1)*secday + hour_init*3.60d3    
+      
+      ! determine initial date (assumes namelist date (year_init, etc) 
+	!                                         and istep0 unchanged)     
       sec = mod(time,secday)            ! elapsed seconds into date at
                                         ! end of dt
       tday = (time-sec)/secday + c1     ! absolute day number
 
       ! Convert the current timestep into a calendar date
-      call sec2time(nyr,month,mday,basis_seconds+sec)
+      call sec2time(nyr,month,mday,basis_seconds+sec+time)
 
       yday = mday + daycal(month)  ! day of the year
       nyr = nyr - year_init + 1    ! year number
