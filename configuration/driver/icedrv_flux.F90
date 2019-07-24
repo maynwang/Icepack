@@ -199,14 +199,23 @@
       real (kind=dbl_kind), dimension (nx,ncat), public :: &
          meltsn      , & ! snow melt in category n (m)
          melttn      , & ! top melt in category n (m)
+         meltln      , & ! lateral melt in category n (m)
          meltbn      , & ! bottom melt in category n (m)
          congeln     , & ! congelation ice formation in category n (m)
          snoicen         ! snow-ice formation in category n (m)
 
       real (kind=dbl_kind), dimension (nx,ncat), public :: &
-         keffn_top       ! effective thermal conductivity of the top ice layer 
-                         ! on categories (W/m^2/K)
-
+         keffn_top    , & ! effective thermal conductivity of the top ice layer 
+                          ! on categories (W/m^2/K)
+         congeln_cumul, & ! cumulative basal ice growth by cat.        (m)
+         snoicen_cumul, & ! cumulative snow-ice formation by cat.      (m)
+         melttn_cumul,  & ! cumulative top ice melt by cat.            (m)
+         meltsn_cumul,  & ! cumulative snow melt by cat.               (m)
+         meltbn_cumul,  & ! cumulative basal ice melt by cat.          (m)
+         dsnown_cumul,  & ! change in snow thickness by cat.	       (m)
+         meltln_cumul     ! cumulative lateral melt by cat.	       (m)
+                         
+                         
       ! quantities passed from ocean mixed layer to atmosphere
 
       real (kind=dbl_kind), dimension (nx), public :: &
@@ -243,6 +252,13 @@
          da0   , & ! area change from cat.1   (/step-->/day)
          dh0_cumul,& ! melt from cat. 1         (m)
          da0_cumul,& ! area change from cat.1 melt  (fraction)
+         congel_cumul, & ! cumulative basal ice growth         (m)
+         frazil_cumul,  & ! cumulative frazil ice growth        (m)
+         snoice_cumul, & ! cumulative snow-ice formation       (m)
+         meltt_cumul,  & ! cumulative top ice melt             (m)
+         melts_cumul,  & ! cumulative snow melt                (m)
+         meltb_cumul,  & ! cumulative basal ice melt           (m)
+         meltl_cumul,  & ! cumulative lateral melt 	        (m)
          dsnow,  & ! change in snow thickness (m/step-->cm/day)
          daidtt, & ! ice area tendency thermo.   (s^-1)
          dvidtt, & ! ice volume tendency thermo. (m/s)
@@ -673,7 +689,9 @@
       meltt  (:) = c0
       melts  (:) = c0
       meltb  (:) = c0
-      meltl  (:) = c0
+      meltl  (:) = c0    
+      dh0 (:) = c0     
+      da0 (:) = c0 
       daidtt (:) = aice(:) ! temporary initial area
       dvidtt (:) = vice(:) ! temporary initial volume
       if (tr_iage) then

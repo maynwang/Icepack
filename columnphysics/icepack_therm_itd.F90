@@ -885,7 +885,8 @@
                                fzsal,      flux_bio,   &
                                nbtrcr,     nblyr,      &
                                nfsd,       d_afsd_latm,&
-                               floe_rad_c, floe_binwidth)
+                               floe_rad_c, floe_binwidth,&)
+                               meltln )
 
       real (kind=dbl_kind), intent(in) :: &
          dt        ! time step (s)
@@ -902,7 +903,8 @@
       real (kind=dbl_kind), dimension (:), intent(inout) :: &
          aicen   , & ! concentration of ice
          vicen   , & ! volume per unit area of ice          (m)
-         vsnon       ! volume per unit area of snow         (m)
+         vsnon   , & ! volume per unit area of snow         (m)
+         meltln      ! volume of lateral ice melt (m/step-->cm/day)
 
       real (kind=dbl_kind), dimension (:,:), intent(inout) :: &
          trcrn       ! tracer array
@@ -1097,7 +1099,9 @@
             endif
 
             ! history diagnostics
+
             meltl = meltl + vicen(n)*rsiden(n)
+	    meltln(n) = vicen(n)*rsiden(n)
 
             ! state variables
             vicen_init(n) = vicen(n)
@@ -1980,7 +1984,7 @@
                                      g0n,                         &
                                      g1n,  hLn,                   &
                                      hRn,  dh0_cumul,             &
-                                     da0_cumul )
+                                     da0_cumul, meltln )
 
       integer (kind=int_kind), intent(in) :: &
          ncat     , & ! number of thickness categories
@@ -2061,6 +2065,7 @@
          aicen    , & ! concentration of ice
          vicen    , & ! volume per unit area of ice          (m)
          vsnon    , & ! volume per unit area of snow         (m)
+         meltln   , & ! volume of lateral melt         (m/step-->cm/day)
          faero_ocn, & ! aerosol flux to ocean  (kg/m^2/s)
          flux_bio , & ! all bio fluxes to ocean
          g0n      , & ! constant coefficient in g(h)
@@ -2237,7 +2242,8 @@
                          fzsal,     flux_bio,      &
                          nbtrcr,    nblyr,         &
                          nfsd,      d_afsd_latm,   &
-                         floe_rad_c,floe_binwidth)
+                         floe_rad_c,floe_binwidth, &
+                         meltln )
       if (icepack_warnings_aborted(subname)) return
 
       ! Floe welding during freezing conditions
@@ -2246,6 +2252,7 @@
                             dt,    frzmlt, &
                             aicen, trcrn,  &
                             d_afsd_weld)
+
       if (icepack_warnings_aborted(subname)) return
 
       !-----------------------------------------------------------------

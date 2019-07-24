@@ -121,6 +121,9 @@
       use icedrv_flux, only: flat, fswabs, flwout, evap, evaps, evapi
       use icedrv_flux, only: Tref, Qref, Qref_iso, Uref
       use icedrv_flux, only: meltt, melts, meltb, congel, snoice
+      use icedrv_flux, only: meltt_cumul, meltb_cumul, melts_cumul, congel_cumul
+      use icedrv_flux, only: melttn_cumul, meltbn_cumul, meltsn_cumul, congeln_cumul
+      use icedrv_flux, only: snoice_cumul, snoicen_cumul, dsnown_cumul
       use icedrv_flux, only: fswthru, fswthru_vdr, fswthru_vdf, fswthru_idr, fswthru_idf
       use icedrv_flux, only: flatn_f, fsensn_f, fsurfn_f, fcondtopn_f
       use icedrv_flux, only: dsnown, faero_atm, faero_ocn
@@ -378,6 +381,21 @@
         endif ! tr_iso
         
       enddo ! i
+      
+      meltt_cumul = meltt_cumul + meltt 
+      meltb_cumul = meltb_cumul + meltb
+      melts_cumul = melts_cumul + melts
+      congel_cumul = congel_cumul + congel
+      snoice_cumul = snoice_cumul + snoice
+        
+      meltsn_cumul= meltsn_cumul + meltsn*aicen
+      melttn_cumul =  melttn_cumul + melttn*aicen
+      meltbn_cumul = meltbn_cumul + meltbn*aicen
+      congeln_cumul = congeln_cumul + congeln*aicen
+      snoicen_cumul = snoicen_cumul + snoicen*aicen
+      dsnown_cumul = dsnown_cumul + dsnown*aicen       
+      
+      
       call icepack_warnings_flush(nu_diag)
       if (icepack_warnings_aborted()) call icedrv_system_abort(string=subname, &
           file=__FILE__, line=__LINE__)
@@ -404,7 +422,9 @@
                                     nltrcr, nx, nfsd
       use icedrv_flux, only: fresh, frain, fpond, frzmlt, frazil, frz_onset
       use icedrv_flux, only: update_ocn_f, fsalt, Tf, sss, salinz, fhocn, rside, fside
-      use icedrv_flux, only: meltl, frazil_diag, flux_bio, faero_ocn, fiso_ocn 
+      use icedrv_flux, only: meltl, meltln, frazil_diag
+      use icedrv_flux, only: meltl_cumul, meltln_cumul, frazil_cumul
+      use icedrv_flux, only: flux_bio, faero_ocn, fiso_ocn 
       use icedrv_flux, only: HDO_ocn, H2_16O_ocn, H2_18O_ocn
       use icedrv_flux, only: dh0, da0, dh0_cumul, da0_cumul     
       use icedrv_init, only: tmask
@@ -496,17 +516,22 @@
                          d_afsd_weld=d_afsd_weld(i,:),                &
                          floe_rad_c=floe_rad_c(:),                    &
                          floe_binwidth=floe_binwidth(:)),             &
-                         g0n(i,:),       g1n(i,:),                    &
-                         hLn(i,:),       hRn(i,:),                    &
-                         dh0(i),         da0(i))
-
+                         g0n = g0n(i,:),  g1n = g1n(i,:),             &
+                         hLn = hLn(i,:),  hRn = hRn(i,:),             &
+                         dh0 = dh0(i),    da0 = da0(i),               &
+                         meltln = meltln(i,:) )
 
          endif ! tmask
 
-         dh0_cumul = dh0_cumul  + dh0    
-         da0_cumul = da0_cumul + da0
          
       enddo                     ! i
+
+      dh0_cumul = dh0_cumul  + dh0    
+      da0_cumul = da0_cumul + da0
+      frazil_cumul = frazil_cumul + frazil    
+      meltl_cumul = meltl_cumul + meltl
+      meltln_cumul = meltln_cumul + meltln
+      
       call icepack_warnings_flush(nu_diag)
       if (icepack_warnings_aborted()) call icedrv_system_abort(string=subname, &
           file=__FILE__, line=__LINE__)

@@ -51,6 +51,10 @@
       subroutine init_thermo_vertical
 
       use icedrv_flux, only: salinz, Tmltz
+      use icedrv_flux, only: meltt_cumul, meltb_cumul, melts_cumul, congel_cumul
+      use icedrv_flux, only: melttn_cumul, meltbn_cumul, meltsn_cumul, congeln_cumul      
+      use icedrv_flux, only: snoice_cumul, meltl_cumul, frazil_cumul, dh0_cumul
+      use icedrv_flux, only: da0_cumul, dsnown_cumul, snoicen_cumul
 
       integer (kind=int_kind) :: &
          i,          &  ! horizontal indices
@@ -78,7 +82,7 @@
       ! Prescibe vertical profile of salinity and melting temperature.
       ! Note this profile is only used for BL99 thermodynamics.
       !-----------------------------------------------------------------
-
+            
       do i = 1, nx
          do k = 1, nilyr+1
             salinz(i,k) = sprofile(k)
@@ -86,6 +90,28 @@
          enddo ! k
       enddo    ! i
 
+      !-----------------------------------------------------------------
+      ! set the cumulative growth and melt contributions to zero
+      !-----------------------------------------------------------------     
+      
+      frazil_cumul (:) = c0
+      snoice_cumul (:) = c0
+      meltt_cumul  (:) = c0
+      melts_cumul  (:) = c0
+      meltb_cumul  (:) = c0
+      meltl_cumul  (:) = c0 
+      dh0_cumul (:) = c0 
+      da0_cumul    (:) = c0 
+      congel_cumul (:) = c0 
+      
+      snoicen_cumul (:,:) = c0
+      melttn_cumul  (:,:) = c0
+      meltsn_cumul  (:,:) = c0
+      meltbn_cumul  (:,:) = c0
+      congeln_cumul (:,:) = c0      
+      dsnown_cumul  (:,:) = c0       
+      
+      
       end subroutine init_thermo_vertical
 
 !=======================================================================

@@ -67,8 +67,13 @@
       use icedrv_flux, only: Tair, Qa, fsw, fcondtop
       use icedrv_flux, only: meltt, meltb, meltl, snoice
       use icedrv_flux, only: dh0_cumul, da0_cumul  
+      use icedrv_flux, only: meltt_cumul, meltb_cumul, melts_cumul, congel_cumul
+      use icedrv_flux, only: snoice_cumul, frazil_cumul, meltl_cumul
+      use icedrv_flux, only: melttn_cumul, meltbn_cumul, meltsn_cumul, congeln_cumul
+      use icedrv_flux, only: dsnown_cumul, snoicen_cumul, meltln_cumul 
       use icedrv_flux, only: dsnow, congel, sst, sss, Tf, fhocn
       use icedrv_state, only: aice, vice, vsno, trcr, trcrn, aicen
+      use icedrv_state, only: vicen, vsnon
       use icedrv_state, only: g0n, g1n, hLn, hRn
 
       real (kind=dbl_kind), intent(in) :: &
@@ -226,13 +231,33 @@
              write(nu_diag_out+n-1,901) 'isotopic conc chg    = ',pdiso(n,k),k
           enddo
         endif
-        write(nu_diag_out+n-1,900) 'cumul cat vol loss (m)    = ', dh0_cumul(n)       
-        write(nu_diag_out+n-1,900) 'cumul cat area loss (m)   = ', da0_cumul(n)
+
+        ! Added thermodynamics contribution diagnostics:
+        write(nu_diag_out+n-1,900) 'cumul snowmelt (m)          = ',melts_cumul(n)        
+        write(nu_diag_out+n-1,900) 'cumul topmelt (m)           = ',meltt_cumul(n)
+        write(nu_diag_out+n-1,900) 'cumul bottommelt (m)        = ',meltb_cumul(n)
+        write(nu_diag_out+n-1,900) 'cumul lateralmelt (m)       = ',meltl_cumul(n)
+        write(nu_diag_out+n-1,900) 'cumul cat vol loss (m)      = ', dh0_cumul(n)
+        write(nu_diag_out+n-1,900) 'cumul newice (m)            = ',frazil_cumul(n) ! frazil
+        write(nu_diag_out+n-1,900) 'cumul congel (m)            = ',congel_cumul(n)
+        write(nu_diag_out+n-1,900) 'cumul snowice (m)           = ',snoice_cumul(n)
+        write(nu_diag_out+n-1,900) 'cumul cat area loss (m)     = ', da0_cumul(n)
+
         do k = 1, ncat
-          write(nu_diag_out+n-1,900) 'g0 itd constant = ',g0n(n,k)     ! ITD constants
-          write(nu_diag_out+n-1,900) 'g1 itd slope = ',g1n(n,k)        ! ITD category slope     
-          write(nu_diag_out+n-1,900) 'hL itd left limit = ',hLn(n,k)   ! ITD category left boundary
-          write(nu_diag_out+n-1,900) 'hR itd right limit = ',hRn(n,k)  ! ITD category right boundary                 
+          write(nu_diag_out+n-1,900) 'ice cat. Tsfc             = ',trcrn(n,nt_Tsfc,k)  ! ocean heat used by ice
+          write(nu_diag_out+n-1,900) 'ice cat. areafrac         = ',aicen(n,k)  ! ocean heat used by ice
+          write(nu_diag_out+n-1,900) 'ice cat. volume (m)       = ',vicen(n,k)  ! internal ice temperature in layer k     
+          write(nu_diag_out+n-1,900) 'ice cat. snow vol. (m)    = ',vsnon(n,k)  ! internal ice temperature in layer k 
+          write(nu_diag_out+n-1,900) 'cat. snowmelt (m)         = ',meltsn_cumul(n,k)        
+          write(nu_diag_out+n-1,900) 'cat. topmelt (m)          = ',melttn_cumul(n,k)
+          write(nu_diag_out+n-1,900) 'cat. bottommelt (m)       = ',meltbn_cumul(n,k)
+          write(nu_diag_out+n-1,900) 'cat. lateralmelt (m)      = ',meltln_cumul(n,k)
+          write(nu_diag_out+n-1,900) 'cat. congel (m)           = ',congeln_cumul(n,k)
+          write(nu_diag_out+n-1,900) 'cat. snowice (m)          = ',snoicen_cumul(n,k)     
+          write(nu_diag_out+n-1,900) 'g0 itd constant           = ',g0n(n,k)     ! ITD constants
+          write(nu_diag_out+n-1,900) 'g1 itd slope              = ',g1n(n,k)        ! ITD category slope     
+          write(nu_diag_out+n-1,900) 'hL itd left limit         = ',hLn(n,k)   ! ITD category left boundary
+          write(nu_diag_out+n-1,900) 'hR itd right limit        = ',hRn(n,k)  ! ITD category right boundary                 
 	enddo 
         
       end do
