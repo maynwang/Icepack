@@ -97,7 +97,10 @@
                              aicen,       trcrn,       & 
                              vicen,       vsnon,       & 
                              aice,        aice0,       & 
-                             fpond                     )
+                             fpond ,	  g0,          &
+                             g1,	  hL,	       &
+                             hR,	  dh0_cumul,   &
+                             da0_cumul                 )
 
       integer (kind=int_kind), intent(in) :: &
          ncat    , & ! number of thickness categories
@@ -156,11 +159,15 @@
       real (kind=dbl_kind), dimension(0:ncat) :: &
          hbnew            ! new boundary locations
 
-      real (kind=dbl_kind), dimension(ncat) :: &
+      real (kind=dbl_kind), intent(out), dimension(ncat) :: &
          g0           , & ! constant coefficient in g(h)
          g1           , & ! linear coefficient in g(h)
          hL           , & ! left end of range over which g(h) > 0
          hR               ! right end of range over which g(h) > 0
+         
+      real (kind=dbl_kind), intent(inout) :: &
+         dh0_cumul  , &  ! melt from 1st ice category   (m/step-->cm/day)  
+         da0_cumul     ! area change from 1st ice cat. melt       
 
       real (kind=dbl_kind), dimension(ncat) :: &
          hicen        , & ! ice thickness for each cat     (m)
@@ -463,6 +470,10 @@
                ! remove area, conserving volume
                   hicen(1) = hicen(1) * aicen(1) / (aicen(1)-da0)
                   aicen(1) = aicen(1) - da0
+                  
+               ! add volume and area loss to the cumulative melt from itd                 
+                  dh0_cumul  = da0*dh0
+                  da0_cumul = da0
 
                   if (tr_pond_topo) &
                      fpond = fpond - (da0 * trcrn(nt_apnd,1) & 
@@ -1965,7 +1976,11 @@
                                      dwavefreq,                   &
                                      d_afsd_latg,  d_afsd_newi,   &
                                      d_afsd_latm,  d_afsd_weld,   &
-                                     floe_rad_c,   floe_binwidth)
+                                     floe_rad_c,   floe_binwidth, &
+                                     g0n,                         &
+                                     g1n,  hLn,                   &
+                                     hRn,  dh0_cumul,             &
+                                     da0_cumul )
 
       integer (kind=int_kind), intent(in) :: &
          ncat     , & ! number of thickness categories
@@ -2035,6 +2050,8 @@
          fhocn    , & ! net heat flux to ocean (W/m^2)
          fzsal    , & ! salt flux to ocean from zsalinity (kg/m^2/s)
          meltl    , & ! lateral ice melt         (m/step-->cm/day)
+         dh0_cumul, & ! volume loss at 1st ice cat. boundary (m)
+         da0_cumul, & ! area loss at 1st ice cat. boundary 
          frazil   , & ! frazil ice growth        (m/step-->cm/day)
          frazil_diag  ! frazil ice growth diagnostic (m/step-->cm/day)
 
@@ -2045,7 +2062,11 @@
          vicen    , & ! volume per unit area of ice          (m)
          vsnon    , & ! volume per unit area of snow         (m)
          faero_ocn, & ! aerosol flux to ocean  (kg/m^2/s)
-         flux_bio     ! all bio fluxes to ocean
+         flux_bio , & ! all bio fluxes to ocean
+         g0n      , & ! constant coefficient in g(h)
+         g1n      , & ! linear coefficient in g(h)
+         hLn      , & ! left end of range over which g(h) > 0
+         hRn          ! right end of range over which g(h) > 0  
 
       real (kind=dbl_kind), dimension(:,:), intent(inout) :: &
          trcrn        ! tracers
@@ -2149,7 +2170,13 @@
                              vsnon,                 &
                              aice      ,         &
                              aice0     ,         &
-                             fpond       )
+                             fpond,              &
+                             g0n,                &
+                             g1n,                &
+                             hLn,                &
+                             hRn,                &	  
+			     dh0_cumul,          &
+			     da0_cumul )
             if (icepack_warnings_aborted(subname)) return
 
          endif ! aice > puny

@@ -65,7 +65,11 @@
          dimension (nx,ncat), public :: &
          aicen , & ! concentration of ice
          vicen , & ! volume per unit area of ice          (m)
-         vsnon     ! volume per unit area of snow         (m)
+         vsnon , & ! volume per unit area of snow         (m)
+         g0n   , & ! constant coefficient in g(h)
+         g1n   , & ! linear coefficient in g(h)
+         hLn   , & ! left end of range over which g(h) > 0
+         hRn       ! right end of range over which g(h) > 0   
 
       real (kind=dbl_kind), public, &
          dimension (nx,max_ntrcr,ncat) :: &

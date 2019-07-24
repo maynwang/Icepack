@@ -21,6 +21,7 @@
       use icedrv_flux, only: zlvl, Tair, potT, rhoa, uatm, vatm, wind, &
          strax, stray, fsw, swvdr, swvdf, swidr, swidf, Qa, flw, frain, &
          fsnow, sst, sss, uocn, vocn, qdp, hmix, Tf, opening, closing, sstdat
+      use icedrv_init_SIMBA, only: lat_buoy, lon_buoy
 
       implicit none
       private
@@ -1003,7 +1004,7 @@
 !=======================================================================
 
       subroutine atm_GEM
-      use read_buoy_data
+
       ! there is data for 366 days, but we only use 365
 
       integer (kind=int_kind) ::  i !, nptgem        ! index
