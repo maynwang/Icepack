@@ -76,6 +76,7 @@
       use icedrv_state, only: vicen, vsnon
       use icedrv_state, only: g0n, g1n, hLn, hRn
       use icedrv_arrays_column, only: albicen, albsnon, albpndn
+
       real (kind=dbl_kind), intent(in) :: &
          dt      ! time step
 
@@ -95,13 +96,17 @@
 
       real (kind=dbl_kind), dimension (nx) :: &
          work1, work2, work3
-
+      real (kind=dbl_kind), dimension (nilyr) :: &
+         Tinterni   
+      real (kind=dbl_kind), dimension (nslyr) :: &
+         Tinterns        
       real (kind=dbl_kind) :: &
          Tffresh, rhos, rhow, rhoi
 
       logical (kind=log_kind) :: tr_brine
       integer (kind=int_kind) :: nt_fbri, nt_Tsfc, nt_fsd, nt_isosno, nt_isoice
-
+      integer (kind=int_kind) :: nt_qice, nt_sice, nt_qsno
+      
       character(len=*), parameter :: subname='(runtime_diags)'
 
       !-----------------------------------------------------------------
@@ -111,8 +116,10 @@
       call icepack_query_parameters(calc_Tsfc_out=calc_Tsfc)
       call icepack_query_tracer_flags(tr_brine_out=tr_brine, &
            tr_fsd_out=tr_fsd,tr_iso_out=tr_iso)
-      call icepack_query_tracer_indices(nt_fbri_out=nt_fbri, nt_Tsfc_out=nt_Tsfc,&
-           nt_fsd_out=nt_fsd, nt_isosno_out=nt_isosno, nt_isoice_out=nt_isoice)
+      call icepack_query_tracer_indices(nt_fbri_out=nt_fbri, nt_Tsfc_out=nt_Tsfc, &
+           nt_fsd_out=nt_fsd, nt_isosno_out=nt_isosno, nt_isoice_out=nt_isoice, &
+           nt_qice_out=nt_qice, nt_qsno_out=nt_qsno, &
+           nt_sice_out=nt_sice)
       call icepack_query_parameters(Tffresh_out=Tffresh, rhos_out=rhos, &
            rhow_out=rhow, rhoi_out=rhoi)
       call icepack_warnings_flush(nu_diag)
@@ -168,6 +175,12 @@
            pdiso(n,k) = work3(n) - pdiso(n,k)
         enddo
 
+        call calc_vertical_profile(nilyr,    nslyr,   &
+                 aice(n),  vice(n),   vsno(n),   &
+                 trcr (n,nt_qice:nt_qice+nilyr-1), Tinterni,    &
+                 trcr (n,nt_qsno:nt_qsno+nslyr-1), Tinterns,    &
+                 trcr (n,nt_sice:nt_sice+nilyr-1))
+                 
         !-----------------------------------------------------------------
         ! start spewing
         !-----------------------------------------------------------------
@@ -243,7 +256,13 @@
         write(nu_diag_out+n-1,900) 'cumul congel (m)            = ',congel_cumul(n)
         write(nu_diag_out+n-1,900) 'cumul snowice (m)           = ',snoice_cumul(n)
         write(nu_diag_out+n-1,900) 'cumul cat area loss (m)     = ', da0_cumul(n)
-
+        do k = 1, nslyr	  
+          write(nu_diag_out+n-1,900) 'int layer snow temp (ppt) = ',Tinterns(k)  !internal snow temperature in layer k 
+	enddo       
+	do k = 1, nilyr
+          write(nu_diag_out+n-1,900) 'int layer salinity (ppt) = ',trcr(n,nt_sice+k-1)  ! ocean heat used by ice
+          write(nu_diag_out+n-1,900) 'int layer ice temp (ppt) = ',Tinterni(k)  ! internal ice temperature in layer k
+	enddo  
         do k = 1, ncat
           write(nu_diag_out+n-1,900) 'ice cat. Tsfc             = ',trcrn(n,nt_Tsfc,k)  ! ocean heat used by ice
           write(nu_diag_out+n-1,900) 'ice cat. areafrac         = ',aicen(n,k)  ! ocean heat used by ice
@@ -611,6 +630,306 @@
 
       end subroutine print_state
 
+!=======================================================================
+!
+! Given the state variables (vicen, vsnon, zqin, etc.),
+! compute variables needed for the vertical thermodynamic profiles
+! (hin, hsn, zTin, etc.)
+!
+! The internal temperature is not a global variable, rather being computed 
+! from other thermodynamic variables.
+! This subroutine corresponds to subroutine init_vertical_profile, but without
+! updating the tracers. 
+! (See module icepack_therm_vertical, authors William H. Lipscomb, LANL ;
+!      C. M. Bitz, UW)
+! 
+      subroutine calc_vertical_profile(nilyr,    nslyr,    &
+                                       aicen,    vicen,    &
+                                       vsnon,              &
+                                       zqin,     zTin,     &
+                                       zqsn,     zTsn,     &
+                                       zSin )
+                                       
+      use icepack_therm_shared, only: l_brine
+      use icepack_parameters, only: ktherm, depressT, puny, c1, heat_capacity
+      use icepack_parameters, only: rhos, Lfresh, hs_min, cp_ice, min_salin
+      use icepack_warnings, only: warnstr, icepack_warnings_add
+      use icepack_warnings, only: icepack_warnings_setabort, icepack_warnings_aborted   
+      use icepack_mushy_physics, only: temperature_mush
+      use icepack_mushy_physics, only: liquidus_temperature_mush
+      use icepack_mushy_physics, only: enthalpy_mush, enthalpy_of_melting
+      use icepack_therm_shared, only: calculate_tin_from_qin, Tmin
+      
+
+                                                                                 
+      integer (kind=int_kind), intent(in) :: &
+         nilyr , & ! number of ice layers
+         nslyr     ! number of snow layers
+
+      real (kind=dbl_kind), intent(in) :: &
+         aicen , & ! concentration of ice
+         vicen , & ! volume per unit area of ice          (m)
+         vsnon     ! volume per unit area of snow         (m)
+ 
+      real (kind=dbl_kind) :: &
+         hilyr       , & ! ice layer thickness
+         hslyr        ! snow layer thickness
+ 
+      real (kind=dbl_kind) :: &
+         hin         , & ! ice thickness (m)
+         hsn             ! snow thickness (m)
+
+      real (kind=dbl_kind), dimension (:), intent(in) :: &
+         zqin            ! ice layer enthalpy (J m-3)        
+      real (kind=dbl_kind), dimension (:), intent(out) :: &
+         zTin            ! internal ice layer temperatures  
+      real (kind=dbl_kind), dimension (:), intent(out) :: & 
+         zTsn            ! snow temperature 
+      real (kind=dbl_kind), dimension (:), intent(in) :: &
+         zSin            ! internal ice layer salinities        
+      real (kind=dbl_kind), dimension (:), intent(in) :: &
+         zqsn            ! snow enthalpy
+
+      ! local variables
+      real (kind=dbl_kind), dimension(nilyr) :: &
+         Tmlts          ! melting temperature
+
+      integer (kind=int_kind) :: &
+         k               ! ice layer index
+
+      real (kind=dbl_kind) :: &
+         rnslyr,       & ! real(nslyr)
+         zqsn_dum,     & ! melting temperature
+         zqin_dum,     & ! melting temperature
+         Tmax            ! maximum allowed snow/ice temperature (deg C)
+
+      logical (kind=log_kind) :: &   ! for vector-friendly error checks
+         tsno_high   , & ! flag for zTsn > Tmax
+         tice_high   , & ! flag for zTin > Tmlt
+         tsno_low    , & ! flag for zTsn < Tmin
+         tice_low        ! flag for zTin < Tmin
+
+      character(len=*),parameter :: subname='(out_vertical_profile)'
+
+      !-----------------------------------------------------------------
+      ! Initialize
+      !-----------------------------------------------------------------
+
+      rnslyr = real(nslyr,kind=dbl_kind)
+
+      tsno_high = .false.
+      tice_high = .false.
+      tsno_low  = .false.
+      tice_low  = .false.
+
+      !-----------------------------------------------------------------
+      ! Surface temperature, ice and snow thickness
+      ! Initialize internal energy
+      !-----------------------------------------------------------------
+      if (aicen .eq. 0d0) then
+	zTsn(:) = 0d0
+	zTin(:) = 0d0            
+      else
+      
+	hin    = vicen / aicen
+	hsn    = vsnon / aicen
+	hilyr    = hin / real(nilyr,kind=dbl_kind)
+	hslyr    = hsn / rnslyr
+	    print *, 'hin, hsn, nilyr : ', hin, hsn, nilyr
+      !-----------------------------------------------------------------
+      ! Snow enthalpy and maximum allowed snow temperature
+      ! If heat_capacity = F, zqsn and zTsn are used only for checking
+      ! conservation.
+      !-----------------------------------------------------------------
+
+	do k = 1, nslyr
+	    print *, 'zqsn, rho, Lfresh : ', zqsn(k), rhos, Lfresh
+      !-----------------------------------------------------------------
+      ! Tmax based on the idea that dT ~ dq / (rhos*cp_ice)
+      !                             dq ~ q dv / v
+      !                             dv ~ puny = eps11
+      ! where 'd' denotes an error due to roundoff.
+      !-----------------------------------------------------------------
+
+	  if (hslyr > hs_min/rnslyr .and. heat_capacity) then
+            ! zqsn < 0              
+            Tmax = -zqsn(k)*puny*rnslyr / &
+                 (rhos*cp_ice*vsnon)
+            zqsn_dum = zqsn(k)                 
+	  else
+            zqsn_dum= -rhos * Lfresh
+            Tmax = puny
+	  endif
+
+      !-----------------------------------------------------------------
+      ! Compute snow temperatures from enthalpies.
+      ! Note: zqsn <= -rhos*Lfresh, so zTsn <= 0.
+      !-----------------------------------------------------------------
+	  zTsn(k) = (Lfresh + zqsn_dum/rhos)/cp_ice
+
+      !-----------------------------------------------------------------
+      ! Check for zTsn > Tmax (allowing for roundoff error) and zTsn < Tmin.
+      !-----------------------------------------------------------------
+	  if (zTsn(k) > Tmax) then
+            tsno_high = .true.
+	  elseif (zTsn(k) < Tmin) then
+            tsno_low  = .true.
+	  endif
+
+	enddo                     ! nslyr
+
+      !-----------------------------------------------------------------
+      ! If zTsn is out of bounds, print diagnostics and exit.
+      !-----------------------------------------------------------------
+
+	if (tsno_high .and. heat_capacity) then
+	  do k = 1, nslyr
+
+            if (hslyr > hs_min/rnslyr) then
+               Tmax = -zqsn(k)*puny*rnslyr / &
+                    (rhos*cp_ice*vsnon)
+            else
+               Tmax = puny
+            endif
+	    print *, 'zTsn, Tmax : ', zTsn(k), Tmax
+            if (zTsn(k) > Tmax) then
+               write(warnstr,*) ' '
+               call icepack_warnings_add(warnstr)
+               write(warnstr,*) subname, 'output thermo, zTsn > Tmax'
+               call icepack_warnings_setabort(.true.,__FILE__,__LINE__)
+               call icepack_warnings_add(subname//" out_vertical_profile: Starting thermo, zTsn > Tmax" ) 
+               return
+            endif
+
+	  enddo                  ! nslyr
+	endif                     ! tsno_high
+
+	if (tsno_low .and. heat_capacity) then
+	  do k = 1, nslyr
+
+            if (zTsn(k) < Tmin) then ! allowing for roundoff error
+               write(warnstr,*) ' '
+               call icepack_warnings_add(warnstr)
+               write(warnstr,*) subname, 'output thermo, zTsn < Tmin'
+               return
+            endif
+
+	  enddo                  ! nslyr
+	endif                     ! tsno_low
+
+	do k = 1, nslyr
+
+	  if (zTsn(k) > c0) then   ! correct roundoff error
+            zTsn(k) = c0
+	  endif
+
+	enddo                     ! nslyr
+
+	do k = 1, nilyr
+
+      !---------------------------------------------------------------------
+      !  Use initial salinity profile for thin ice
+      !---------------------------------------------------------------------
+
+	  if (ktherm == 1 .and. zSin(k) < min_salin-puny) then
+            write(warnstr,*) ' '
+            call icepack_warnings_add(warnstr)
+            write(warnstr,*) subname, 'output zSin < min_salin, layer', k
+            return
+	  endif
+         
+	  if (ktherm == 2) then
+            Tmlts(k) = liquidus_temperature_mush(zSin(k))
+	  else
+            Tmlts(k) = -zSin(k) * depressT
+	  endif
+
+      !-----------------------------------------------------------------
+      ! Compute ice enthalpy
+      ! If heat_capacity = F, zqin and zTin are used only for checking
+      ! conservation.
+      !-----------------------------------------------------------------
+
+      !-----------------------------------------------------------------
+      ! Compute ice temperatures from enthalpies using quadratic formula
+      !-----------------------------------------------------------------
+         
+	  if (ktherm == 2) then
+            zTin(k) = temperature_mush(zqin(k),zSin(k))
+	  else
+            zTin(k) = calculate_Tin_from_qin(zqin(k),Tmlts(k))
+	  endif
+
+	  if (l_brine) then
+            Tmax = Tmlts(k)
+	  else                ! fresh ice
+            Tmax = -zqin(k)*puny/(rhos*cp_ice*vicen)
+	  endif
+
+      !-----------------------------------------------------------------
+      ! Check for zTin > Tmax and zTin < Tmin
+      !-----------------------------------------------------------------
+	  if (zTin(k) > Tmax) then
+            tice_high = .true.
+	  elseif (zTin(k) < Tmin) then
+            tice_low  = .true.
+	  endif
+
+      !-----------------------------------------------------------------
+      ! If zTin is out of bounds, print diagnostics and exit.
+      !-----------------------------------------------------------------
+
+	  if (tice_high .and. heat_capacity) then
+
+            if (l_brine) then
+               Tmax = Tmlts(k)
+            else             ! fresh ice
+               Tmax = -zqin(k)*puny/(rhos*cp_ice*vicen)
+            endif
+
+            if (zTin(k) > Tmax) then               
+               if (ktherm == 2) then
+                  zqin_dum = enthalpy_of_melting(zSin(k)) - c1
+                  zTin(k) = temperature_mush(zqin_dum,zSin(k))
+                  write(warnstr,*) subname, 'Corrected quantities'
+               else
+                  call icepack_warnings_setabort(.true.,__FILE__,__LINE__)
+                  call icepack_warnings_add(subname//" init_vertical_profile: Starting thermo, T > Tmax, layer" ) 
+                  return
+               endif
+            endif
+	  endif                  ! tice_high
+
+	  if (tice_low .and. heat_capacity) then
+            if (zTin(k) < Tmin) then
+               write(warnstr,*) ' '
+               call icepack_warnings_add(warnstr)
+               write(warnstr,*) subname, 'Starting thermo T < Tmin, layer', k
+               return
+            endif
+	  endif                  ! tice_low
+
+      !-----------------------------------------------------------------
+      ! correct roundoff error
+      !-----------------------------------------------------------------
+
+	  if (ktherm /= 2) then
+
+            if (zTin(k) > c0) then
+               zTin(k) = c0
+            endif
+
+	  endif
+
+	enddo                     ! nilyr
+      endif ! if aicen = 0
+      
+      end subroutine calc_vertical_profile
+      
+!=======================================================================     
+      
+      
+      
 !=======================================================================
 
       end module icedrv_diagnostics
