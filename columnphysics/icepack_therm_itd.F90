@@ -2229,31 +2229,31 @@
       ! Melt ice laterally.
       !-----------------------------------------------------------------
 
-      call lateral_melt (dt,        ncat,          &
-                         nilyr,     nslyr,         &
-                         n_aero,    fpond,         &
-                         fresh,     fsalt,         &
-                         fhocn,     faero_ocn,     &
-                         l_fiso_ocn,               &
-                         rside,     meltl,         &
-                         fside,     sss,           &
-                         aicen,     vicen,         &
-                         vsnon,     trcrn,         &
-                         fzsal,     flux_bio,      &
-                         nbtrcr,    nblyr,         &
-                         nfsd,      d_afsd_latm,   &
-                         floe_rad_c,floe_binwidth, &
-                         meltln )
-      if (icepack_warnings_aborted(subname)) return
+!      call lateral_melt (dt,        ncat,          &
+!                         nilyr,     nslyr,         &
+!                         n_aero,    fpond,         &
+!                         fresh,     fsalt,         &
+!                         fhocn,     faero_ocn,     &
+!                         l_fiso_ocn,               &
+!                         rside,     meltl,         &
+!                         fside,     sss,           &
+!                         aicen,     vicen,         &
+!                         vsnon,     trcrn,         &
+!                         fzsal,     flux_bio,      &
+!                         nbtrcr,    nblyr,         &
+!                         nfsd,      d_afsd_latm,   &
+!                         floe_rad_c,floe_binwidth, &
+!                         meltln )
+!      if (icepack_warnings_aborted(subname)) return
 
-      ! Floe welding during freezing conditions
-      if (tr_fsd) &
-      call fsd_weld_thermo (ncat,  nfsd,   &
-                            dt,    frzmlt, &
-                            aicen, trcrn,  &
-                            d_afsd_weld)
-
-      if (icepack_warnings_aborted(subname)) return
+!      ! Floe welding during freezing conditions
+!      if (tr_fsd) &
+!      call fsd_weld_thermo (ncat,  nfsd,   &
+!                            dt,    frzmlt, &
+!                            aicen, trcrn,  &
+!                            d_afsd_weld)
+!
+!      if (icepack_warnings_aborted(subname)) return
 
       !-----------------------------------------------------------------
       ! For the special case of a single category, adjust the area and
@@ -2262,11 +2262,11 @@
       !-----------------------------------------------------------------
 
 !echmod: test this
-      if (ncat==1) &
-         call reduce_area (hin_max   (0),                &
-                           aicen     (1), vicen     (1), &
-                           aicen_init(1), vicen_init(1))
-         if (icepack_warnings_aborted(subname)) return
+!      if (ncat==1) &
+!         call reduce_area (hin_max   (0),                &
+!                           aicen     (1), vicen     (1), &
+!                           aicen_init(1), vicen_init(1))
+!         if (icepack_warnings_aborted(subname)) return
 
       !-----------------------------------------------------------------
       ! ITD cleanup: Rebin thickness categories if necessary, and remove

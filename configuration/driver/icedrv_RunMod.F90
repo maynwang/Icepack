@@ -167,22 +167,23 @@
       ! dynamics, transport, ridging
       !-----------------------------------------------------------------
       
-      call init_history_dyn
+!      call init_history_dyn
       
       ! wave fracture of the floe size distribution
       ! note this is called outside of the dynamics subcycling loop
       if (tr_fsd .and. wave_spec) call step_dyn_wave(dt)
 
-      do k = 1, ndtd
+! THIS HAS BEEN DEACTIVATED FOR LFI SIMULATIONS. 
+! NEEDS TO BE CODED AS AN OPTION
+!      do k = 1, ndtd        
+!        ! ridging
+!        call step_dyn_ridge (dt_dyn, ndtd)
         
-        ! ridging
-        call step_dyn_ridge (dt_dyn, ndtd)
+!        ! clean up, update tendency diagnostics
+!        offset = c0
+!        call update_state (dt_dyn, daidtd, dvidtd, dagedtd, offset)
         
-        ! clean up, update tendency diagnostics
-        offset = c0
-        call update_state (dt_dyn, daidtd, dvidtd, dagedtd, offset)
-        
-      enddo
+!      enddo
 
 !      call icedrv_diagnostics_debug ('post dynamics')
       
