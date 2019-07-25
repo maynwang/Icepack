@@ -79,7 +79,7 @@
 
       ! albedo components for history
       real (kind=dbl_kind), &
-         dimension (nx, ncat) :: &
+         dimension (nx, ncat), public  :: &
          albicen    , & ! bare ice
          albsnon    , & ! snow
          albpndn    , & ! pond
