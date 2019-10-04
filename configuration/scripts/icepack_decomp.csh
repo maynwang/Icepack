@@ -9,7 +9,7 @@ set grid = $ICE_DECOMP_GRID
 #--- computation ---
 
 if (${grid} == 'col') then
-  set nxglob = 4
+  set nxglob = 5
 else
   echo "${0:t}: ERROR unknown grid ${grid}"
   exit -9
