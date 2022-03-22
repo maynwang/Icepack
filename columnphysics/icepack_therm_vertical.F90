@@ -866,7 +866,7 @@
       !  Use initial salinity profile for thin ice
       !---------------------------------------------------------------------
 
-         if (ktherm == 1 .and. zSin(k) < min_salin-puny) then
+         if (ktherm == 1 .and. zSin(k) < min_salin-puny .and. l_brine) then
             write(warnstr,*) ' '
             call icepack_warnings_add(warnstr)
             write(warnstr,*) subname, 'Starting zSin < min_salin, layer', k
