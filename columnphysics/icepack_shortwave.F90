@@ -199,6 +199,11 @@
       allocate(l_fswthru_idr(ncat))
       allocate(l_fswthru_idf(ncat))
 
+      l_fswthru_vdr = c0
+      l_fswthru_vdf = c0
+      l_fswthru_idr = c0
+      l_fswthru_idf = c0
+
       ! For basic shortwave, set coszen to a constant between 0 and 1.
       coszen = p5 ! sun above the horizon
 
@@ -962,6 +967,11 @@
       allocate(l_fswthrun_vdf(ncat))
       allocate(l_fswthrun_idr(ncat))
       allocate(l_fswthrun_idf(ncat))
+
+      l_fswthrun_vdr = c0
+      l_fswthrun_vdf = c0
+      l_fswthrun_idr = c0
+      l_fswthrun_idf = c0
 
       linitonly = .false.
       if (present(initonly)) then
@@ -4142,6 +4152,11 @@
       allocate(l_fswthrun_vdf(ncat))
       allocate(l_fswthrun_idr(ncat))
       allocate(l_fswthrun_idf(ncat))
+
+      l_fswthrun_vdr = c0
+      l_fswthrun_vdf = c0
+      l_fswthrun_idr = c0
+      l_fswthrun_idf = c0
 
         hin = c0
         hbri = c0
