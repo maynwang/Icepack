@@ -2514,6 +2514,15 @@
          worka  = c0
          workb  = c0
 
+         fswabsn = c0
+         flwoutn = c0
+         evapn = c0
+         evapsn = c0
+         evapin = c0
+         freshn = c0
+         fsaltn = c0
+         fhocnn = c0
+
          if (aicen_init(n) > puny) then
 
             if (calc_Tsfc .or. calc_strair) then 
