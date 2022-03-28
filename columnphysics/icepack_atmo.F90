@@ -64,7 +64,7 @@
                                       uvel,     vvel,     &
                                       Uref,     zlvs      )     
 
-      use icepack_parameters, only: highfreq, natmiter, atmiter_conv
+      use icepack_parameters, only: highfreq, natmiter, atmiter_conv, zTrf
 
       character (len=3), intent(in) :: &
          sfctype      ! ice or ocean
@@ -164,9 +164,6 @@
          stable, & ! stability factor
          cpvir , & ! defined as cp_wv/cp_air - 1.
          psixh     ! stability function at zlvl (at zlvs if present) (heat and water)
-
-      real (kind=dbl_kind), parameter :: &
-         zTrf  = c2     ! reference height for air temp (m)
 
       logical (kind=log_kind) :: &
          l_iso_flag     ! local flag to trigger iso calculations
@@ -363,7 +360,7 @@
       lhcoef = rhoa * ustar * Lheat  * re
 
       !------------------------------------------------------------
-      ! Compute diagnostics: 2m ref T, Q, U
+      ! Compute diagnostics: ref T, Q, U (at zTrf)
       !------------------------------------------------------------
 
       hols  = hols*zTrf/zlvl
