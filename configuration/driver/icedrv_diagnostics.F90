@@ -16,7 +16,7 @@
       use icepack_intfc, only: icepack_query_parameters
       use icepack_intfc, only: icepack_query_tracer_flags, icepack_query_tracer_indices
       use icedrv_system, only: icedrv_system_abort
-
+      use icepack_therm_mushy, only: permeability
       implicit none
       private
       public :: runtime_diags, &
@@ -65,7 +65,7 @@
       use icedrv_flux, only: fswabs, flw, flwout, fsens, fsurf, flat
       use icedrv_flux, only: frain, fiso_evap, fiso_ocn, fiso_atm
       use icedrv_flux, only: Tair, Qa, fsw, fcondtop
-      use icedrv_flux, only: meltt, meltb, meltl, snoice
+      use icedrv_flux, only: meltt, meltb, meltl, snoice, phin
       use icedrv_flux, only: dh0_cumul, da0_cumul  
       use icedrv_flux, only: meltt_cumul, meltb_cumul, melts_cumul, congel_cumul
       use icedrv_flux, only: snoice_cumul, frazil_cumul, meltl_cumul
@@ -83,7 +83,7 @@
       ! local variables
 
       integer (kind=int_kind) :: &
-         n, nc, k
+         n, nc, k, nil
 
       logical (kind=log_kind) :: &
          calc_Tsfc, tr_fsd, tr_iso
@@ -92,7 +92,7 @@
       real (kind=dbl_kind) :: & 
          pTair, pfsnow, pfrain, &
          paice, hiavg, hsavg, hbravg, psalt, pTsfc, &
-         pevap, pfhocn, fsdavg
+         pevap, pfhocn, fsdavg, perm
 
       real (kind=dbl_kind), dimension (nx) :: &
          work1, work2, work3
@@ -181,6 +181,8 @@
                  trcr (n,nt_qsno:nt_qsno+nslyr-1), Tinterns,    &
                  trcr (n,nt_sice:nt_sice+nilyr-1))
                  
+
+
         !-----------------------------------------------------------------
         ! start spewing
         !-----------------------------------------------------------------
@@ -260,14 +262,14 @@
           write(nu_diag_out+n-1,900) 'int layer snow temp (ppt) = ',Tinterns(k)  !internal snow temperature in layer k 
 	enddo       
 	do k = 1, nilyr
-          write(nu_diag_out+n-1,900) 'int layer salinity (ppt) = ',trcr(n,nt_sice+k-1)  ! ocean heat used by ice
+          write(nu_diag_out+n-1,900) 'int layer salinity (ppt) = ',trcr(n,nt_sice+k-1)  ! salinit in each layer k
           write(nu_diag_out+n-1,900) 'int layer ice temp (ppt) = ',Tinterni(k)  ! internal ice temperature in layer k
 	enddo  
         do k = 1, ncat
-          write(nu_diag_out+n-1,900) 'ice cat. Tsfc             = ',trcrn(n,nt_Tsfc,k)  ! ocean heat used by ice
-          write(nu_diag_out+n-1,900) 'ice cat. areafrac         = ',aicen(n,k)  ! ocean heat used by ice
-          write(nu_diag_out+n-1,900) 'ice cat. volume (m)       = ',vicen(n,k)  ! internal ice temperature in layer k     
-          write(nu_diag_out+n-1,900) 'ice cat. snow vol. (m)    = ',vsnon(n,k)  ! internal ice temperature in layer k 
+          write(nu_diag_out+n-1,900) 'ice cat. Tsfc             = ',trcrn(n,nt_Tsfc,k)  ! Ice top temperature in category
+          write(nu_diag_out+n-1,900) 'ice cat. areafrac         = ',aicen(n,k)  ! area fraction of ice category k
+          write(nu_diag_out+n-1,900) 'ice cat. volume (m)       = ',vicen(n,k)  ! ice volume in category k     
+          write(nu_diag_out+n-1,900) 'ice cat. snow vol. (m)    = ',vsnon(n,k)  ! snow volume in category k 
           write(nu_diag_out+n-1,900) 'cat. snowmelt (m)         = ',meltsn_cumul(n,k)        
           write(nu_diag_out+n-1,900) 'cat. topmelt (m)          = ',melttn_cumul(n,k)
           write(nu_diag_out+n-1,900) 'cat. bottommelt (m)       = ',meltbn_cumul(n,k)
@@ -281,6 +283,11 @@
           write(nu_diag_out+n-1,900) 'g1 itd slope              = ',g1n(n,k)     ! ITD category slope     
           write(nu_diag_out+n-1,900) 'hL itd left limit         = ',hLn(n,k)     ! ITD category left boundary
           write(nu_diag_out+n-1,900) 'hR itd right limit        = ',hRn(n,k)     ! ITD category right boundary
+          do nil = 1, nilyr
+            write(nu_diag_out+n-1,900) 'liquid fraction           = ', phin(n,nil,k)  ! liquid fraction
+            perm = permeability(phin(n,nil,k))
+            write(nu_diag_out+n-1,900) 'layer permeability        = ', perm  ! ice layer permeability 
+          enddo
 	enddo 
         
       end do

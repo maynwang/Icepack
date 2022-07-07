@@ -100,6 +100,7 @@
                                   fhocnn,      meltt,     &
                                   melts,       meltb,     &
                                   congel,      snoice,    &
+                                  phi,                    &
                                   mlt_onset,   frz_onset, &
                                   yday,        dsnow,     &
                                   prescribed_ice)
@@ -134,6 +135,9 @@
          zqsn    , & ! snow layer enthalpy, zqsn < 0 (J m-3)
          zqin    , & ! ice layer enthalpy, zqin < 0 (J m-3)
          zSin        ! internal ice layer salinities
+
+      real (kind=dbl_kind), dimension (1:nilyr), intent(out) :: &
+         phi         ! liquid fraction
 
       ! input from atmosphere
       real (kind=dbl_kind), &
@@ -258,6 +262,7 @@
       dsnow   = c0
       zTsn(:) = c0
       zTin(:) = c0
+      phi(1:nilyr)  = c0
 
       if (calc_Tsfc) then
          fsensn  = c0
@@ -293,7 +298,6 @@
       if (heat_capacity) then   ! usual case
 
          if (ktherm == 2) then
-
             call temperature_changes_salinity(dt,                   & 
                                               nilyr,     nslyr,     &
                                               rhoa,      flw,       &
@@ -307,11 +311,13 @@
                                               zqsn,      zTsn,      &
                                               zSin,                 &
                                               Tsf,       Tbot,      &
-                                              sss,                  &
+                                              sss,       phi,       &
                                               fsensn,    flatn,     &
                                               flwoutn,   fsurfn,    &
                                               fcondtopn, fcondbotn,  &
                                               fadvocn,   snoice)
+            
+
             if (icepack_warnings_aborted(subname)) return
 
          else ! ktherm
@@ -2109,7 +2115,7 @@
                                     melts       , meltsn      , &
                                     congel      , congeln     , &
                                     snoice      , snoicen     , &
-                                    dsnown      , &
+                                    dsnown      , phin        , &
                                     lmask_n     , lmask_s     , &
                                     mlt_onset   , frz_onset   , &
                                     yday        , prescribed_ice, &
@@ -2275,6 +2281,7 @@
          zqsn        , & ! snow layer enthalpy (J m-3)
          zqin        , & ! ice layer enthalpy (J m-3)
          zSin        , & ! internal ice layer salinities
+         phin        , & ! liquid fraction
          Sswabsn     , & ! SW radiation absorbed in snow layers (W m-2)
          Iswabsn         ! SW radiation absorbed in ice layers (W m-2)
 
@@ -2514,6 +2521,7 @@
          congeln(n) = c0
          snoicen(n) = c0
          dsnown (n) = c0
+         phin(:,n) = c0
 
          Trefn  = c0
          Qrefn  = c0
@@ -2647,6 +2655,7 @@
                                     melttn   (n), meltsn   (n), &
                                     meltbn   (n),               &
                                     congeln  (n), snoicen  (n), &
+                                    phin(:,n),                  &
                                     mlt_onset,    frz_onset,    &
                                     yday,         dsnown   (n), &
                                     prescribed_ice)

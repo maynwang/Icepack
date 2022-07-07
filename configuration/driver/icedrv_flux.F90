@@ -204,6 +204,9 @@
          congeln     , & ! congelation ice formation in category n (m)
          snoicen         ! snow-ice formation in category n (m)
 
+      real (kind=dbl_kind), dimension (nx,nilyr,ncat), public :: &    
+         phin            ! liquid fraction in ice layers, in category n
+
       real (kind=dbl_kind), dimension (nx,ncat), public :: &
          keffn_top    , & ! effective thermal conductivity of the top ice layer 
                           ! on categories (W/m^2/K)

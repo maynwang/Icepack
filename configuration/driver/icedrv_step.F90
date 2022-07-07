@@ -112,7 +112,7 @@
       use icedrv_domain_size, only: ncat, nilyr, nslyr, n_aero, n_iso, nx
       use icedrv_flux, only: frzmlt, sst, Tf, strocnxT, strocnyT, rside, fside, &
                              fbot, Tbot, Tsnice
-      use icedrv_flux, only: meltsn, melttn, meltbn, congeln, snoicen, uatm, vatm
+      use icedrv_flux, only: meltsn, melttn, meltbn, congeln, snoicen, uatm, vatm, phin
       use icedrv_flux, only: wind, rhoa, potT, Qa, Qa_iso, zlvl, strax, stray, flatn
       use icedrv_flux, only: fsensn, fsurfn, fcondtopn, fcondbotn
       use icedrv_flux, only: flw, fsnow, fpond, sss, mlt_onset, frz_onset
@@ -349,7 +349,7 @@
             melts    = melts(i),      meltsn    = meltsn(i,:),    &
             congel   = congel(i),     congeln   = congeln(i,:),   &
             snoice   = snoice(i),     snoicen   = snoicen(i,:),   &
-            dsnown   = dsnown(i,:),                               &
+            dsnown   = dsnown(i,:),   phin      = phin(i,1:nilyr,:),&
             lmask_n  = lmask_n(i),    lmask_s   = lmask_s(i),     &
             mlt_onset=mlt_onset(i),   frz_onset = frz_onset(i),   &
             yday = yday,  prescribed_ice = prescribed_ice)
