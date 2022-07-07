@@ -1792,6 +1792,14 @@
                    2.00_dbl_kind, 4.00_dbl_kind, &
                    6.00_dbl_kind, 999._dbl_kind  /
 
+      ! all thickness categories 
+      data wmo10 / 0.10_dbl_kind, 0.15_dbl_kind, &
+                   0.30_dbl_kind, 0.50_dbl_kind, &
+                   0.70_dbl_kind, 1.20_dbl_kind, &
+                   2.00_dbl_kind, 4.00_dbl_kind, &
+                   6.00_dbl_kind, 999._dbl_kind  /
+
+
       rncat = real(ncat, kind=dbl_kind)
       d1 = 3.0_dbl_kind / rncat
       d2 = 0.5_dbl_kind / rncat
