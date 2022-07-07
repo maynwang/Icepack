@@ -56,7 +56,7 @@ MODULE gemdrv_read_rpn
   
 
    INTEGER, PUBLIC  ::   jpi = 528   ! = ( jpiglo-2*jpreci + (jpni-1) ) / jpni + 2*jpreci   !: first  dimension
-   INTEGER, PUBLIC  ::   jpj = 603  ! = ( jpjglo-2*jprecj + (jpnj-1) ) / jpnj + 2*jprecj   !: second dimension  
+   INTEGER, PUBLIC  ::   jpj = 735  ! = ( jpjglo-2*jprecj + (jpnj-1) ) / jpnj + 2*jprecj   !: second dimension  
    REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:) :: lat_rpn
    REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:) :: lon_rpn   
    
