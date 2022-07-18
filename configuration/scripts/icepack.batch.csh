@@ -149,6 +149,11 @@ cat >> ${jobfile} << EOFB
 #PBS -W umask=022
 EOFB
 
+else if (${ICE_MACHINE} =~ robert* || ${ICE_MACHINE} =~ underhill* || ${ICE_MACHINE} =~ ppp6* || ${ICE_MACHINE} =~ ppp5*) then
+cat >> ${jobfile} << EOFB
+# nothing to do
+EOFB
+
 else if (${ICE_MACHINE} =~ high_Sierra*) then
 cat >> ${jobfile} << EOFB
 # nothing to do
