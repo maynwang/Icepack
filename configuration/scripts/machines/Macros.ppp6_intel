@@ -46,3 +46,5 @@ ifeq ($(ICE_THREADED), true)
    CFLAGS += -qopenmp
    FFLAGS += -qopenmp
 endif
+
+SLIBS += -lrmn
