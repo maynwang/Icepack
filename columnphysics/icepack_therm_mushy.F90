@@ -3254,7 +3254,8 @@ contains
          ice_density       , & ! density of ice layer (kg m-3)
          hadded            , & ! thickness rate of water used from ocean (m/s)
          wadded            , & ! mass rate of water used from ocean (kg/m^2/s)
-         eadded                ! energy rate of water used from ocean (W/m^2) 
+         eadded            , & ! energy rate of water used from ocean (W/m^2)
+         phi_min               ! Minimum liquid fraction in all ice layers 
 
 !   real(kind=dbl_kind) :: &
 !        sadded                ! salt rate of water used from ocean (kg/m^2/s)
@@ -3273,9 +3274,11 @@ contains
 
        ! ice mass
        ice_mass = c0
+       phi_tot = c1
        do k = 1, nilyr
           ice_density = min(phi(k) * icepack_mushy_density_brine(Sbr(k)) + (c1 - phi(k)) * rhoi,rho_ocn)
           ice_mass = ice_mass + ice_density
+          phi_min = min( phi_min, phi(k))
        enddo ! k
        ice_mass = ice_mass * hilyr
 
@@ -3284,60 +3287,60 @@ contains
 
        ! check if have flooded ice
        if (freeboard_density > c0) then
+          if (phi_min > 0.058d0) then 
+              ! sea ice fraction of newly formed snow ice
+              phi_snowice = (c1 - rhos / rhoi)
 
-          ! sea ice fraction of newly formed snow ice
-          phi_snowice = (c1 - rhos / rhoi)
+              ! density of newly formed snowice
+              rho_snowice = phi_snowice * rho_ocn + (c1 - phi_snowice) * rhoi
 
-          ! density of newly formed snowice
-          rho_snowice = phi_snowice * rho_ocn + (c1 - phi_snowice) * rhoi
+              ! calculate thickness of new ice added
+              dh = freeboard_density / (rho_ocn - rho_snowice + rhos)
+              dh = max(min(dh,hsn),c0)
 
-          ! calculate thickness of new ice added
-          dh = freeboard_density / (rho_ocn - rho_snowice + rhos)
-          dh = max(min(dh,hsn),c0)
+              ! enthalpy of snow that becomes snowice
+              call enthalpy_snow_snowice(nslyr, dh, hsn, zqsn, zqsn_snowice)
+              if (icepack_warnings_aborted(subname)) return
 
-          ! enthalpy of snow that becomes snowice
-          call enthalpy_snow_snowice(nslyr, dh, hsn, zqsn, zqsn_snowice)
-          if (icepack_warnings_aborted(subname)) return
+              ! change thicknesses
+              hin2 = hin + dh
+              hsn2 = hsn - dh
 
-          ! change thicknesses
-          hin2 = hin + dh
-          hsn2 = hsn - dh
+              hilyr2 = hin2 / real(nilyr,dbl_kind)
+              hslyr2 = hsn2 / real(nslyr,dbl_kind)
 
-          hilyr2 = hin2 / real(nilyr,dbl_kind)
-          hslyr2 = hsn2 / real(nslyr,dbl_kind)
+              ! properties of new snow ice
+              zSin_snowice = phi_snowice * sss
+              zqin_snowice = phi_snowice * qocn + zqsn_snowice
 
-          ! properties of new snow ice
-          zSin_snowice = phi_snowice * sss
-          zqin_snowice = phi_snowice * qocn + zqsn_snowice
+              ! change snow properties
+              call update_vertical_tracers_snow(nslyr, zqsn, hslyr, hslyr2)
+              if (icepack_warnings_aborted(subname)) return
 
-          ! change snow properties
-          call update_vertical_tracers_snow(nslyr, zqsn, hslyr, hslyr2)
-          if (icepack_warnings_aborted(subname)) return
+              ! change ice properties
+              call update_vertical_tracers_ice(nilyr, zqin, hilyr, hilyr2, &
+                   hin,  hin2,  zqin_snowice)
+              if (icepack_warnings_aborted(subname)) return
+              call update_vertical_tracers_ice(nilyr, zSin, hilyr, hilyr2, &
+                   hin,  hin2,  zSin_snowice)
+              if (icepack_warnings_aborted(subname)) return
+              call update_vertical_tracers_ice(nilyr, phi,  hilyr, hilyr2, &
+                   hin,  hin2,  phi_snowice)
+              if (icepack_warnings_aborted(subname)) return
 
-          ! change ice properties
-          call update_vertical_tracers_ice(nilyr, zqin, hilyr, hilyr2, &
-               hin,  hin2,  zqin_snowice)
-          if (icepack_warnings_aborted(subname)) return
-          call update_vertical_tracers_ice(nilyr, zSin, hilyr, hilyr2, &
-               hin,  hin2,  zSin_snowice)
-          if (icepack_warnings_aborted(subname)) return
-          call update_vertical_tracers_ice(nilyr, phi,  hilyr, hilyr2, &
-               hin,  hin2,  phi_snowice)
-          if (icepack_warnings_aborted(subname)) return
+              ! change thicknesses
+              hilyr = hilyr2
+              hslyr = hslyr2
+              snoice = dh
 
-          ! change thicknesses
-          hilyr = hilyr2
-          hslyr = hslyr2
-          snoice = dh
+              hadded = (dh * phi_snowice) / dt
+              wadded = hadded * rhoi
+              eadded = hadded * qocn
+!             sadded = wadded * ice_ref_salinity * p001
 
-          hadded = (dh * phi_snowice) / dt
-          wadded = hadded * rhoi
-          eadded = hadded * qocn
-!         sadded = wadded * ice_ref_salinity * p001
-
-          ! conservation
-          fadvheat = fadvheat - eadded
-
+              ! conservation
+              fadvheat = fadvheat - eadded
+          endif
        endif
 
     endif
