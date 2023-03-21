@@ -119,7 +119,7 @@
          Uref         ! reference height wind speed (m/s)
 
       real (kind=dbl_kind), intent(in), optional :: &
-         zlvs        ! atm level height (scalar quantities) (m)
+         zlvs         ! atm level height (scalar quantities) (m)
 
       ! local variables
 
@@ -363,7 +363,11 @@
       ! Compute diagnostics: T, Q (at zTrf), U (at zref)
       !------------------------------------------------------------
 
-      hols  = hols*zTrf/zlvl
+      if (present(zlvs)) then
+         hols  = hols*zTrf/zlvs
+      else
+         hols  = hols*zTrf/zlvl
+      endif
       psix2 = -c5*hols*stable + (c1-stable)*psi_scalar_unstable(hols)
       fac   = (rh/vonkar) &
             * (alzs + al2 - psixh + psix2)
