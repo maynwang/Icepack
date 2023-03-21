@@ -64,7 +64,8 @@
                                       uvel,     vvel,     &
                                       Uref,     zlvs      )     
 
-      use icepack_parameters, only: highfreq, natmiter, atmiter_conv, zTrf
+      use icepack_parameters, only: highfreq, natmiter, atmiter_conv, zTrf, &
+                                    umin
 
       character (len=3), intent(in) :: &
          sfctype      ! ice or ocean
@@ -138,8 +139,7 @@
          qqq   , & ! for qsat, dqsfcdt
          TTT   , & ! for qsat, dqsfcdt
          qsat  , & ! the saturation humidity of air (kg/m^3)
-         Lheat , & ! Lvap or Lsub, depending on surface type
-         umin      ! minimum wind speed (m/s)
+         Lheat     ! Lvap or Lsub, depending on surface type
 
       real (kind=dbl_kind) :: &
          ustar , & ! ustar (m/s)
@@ -185,8 +185,6 @@
 
       if (highfreq) then       
        umin  = p5 ! minumum allowable wind-ice speed difference of 0.5 m/s
-      else
-       umin  = c1 ! minumum allowable wind speed of 1m/s
       endif
 
       Tref = c0
