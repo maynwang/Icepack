@@ -360,7 +360,7 @@
       lhcoef = rhoa * ustar * Lheat  * re
 
       !------------------------------------------------------------
-      ! Compute diagnostics: ref T, Q, U (at zTrf)
+      ! Compute diagnostics: T, Q (at zTrf), U (at zref)
       !------------------------------------------------------------
 
       hols  = hols*zTrf/zlvl
