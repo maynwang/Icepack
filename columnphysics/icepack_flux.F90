@@ -61,6 +61,7 @@
                                meltb,                &
                                congel,  snoice,      &
                                Uref,     Urefn,      &
+                               delq,     delqn,      &
                                Qref_iso, Qrefn_iso,  &
                                fiso_ocn, fiso_ocnn,  &
                                fiso_evap, fiso_evapn)
@@ -85,6 +86,7 @@
           Trefn   , & ! air tmp reference level         (K)
           Qrefn   , & ! air sp hum reference level      (kg/kg)
           Urefn   , & ! air speed reference level       (m/s)
+          delqn   , & ! humidity difference             (kg/kg)
           freshn  , & ! fresh water flux to ocean       (kg/m2/s)
           fsaltn  , & ! salt flux to ocean              (kg/m2/s)
           fhocnn  , & ! actual ocn/ice heat flx         (W/m**2)
@@ -117,6 +119,7 @@
           Tref    , & ! air tmp reference level         (K)
           Qref    , & ! air sp hum reference level      (kg/kg)
           Uref    , & ! air speed reference level       (m/s)
+          delq    , & ! humidity difference             (kg/kg)
           fresh   , & ! fresh water flux to ocean       (kg/m2/s)
           fsalt   , & ! salt flux to ocean              (kg/m2/s)
           fhocn   , & ! actual ocn/ice heat flx         (W/m**2)
@@ -172,6 +175,7 @@
       Tref       = Tref     + Trefn     * aicen
       Qref       = Qref     + Qrefn     * aicen
       Uref       = Uref     + Urefn     * aicen
+      delq       = delq     + delqn     * aicen
 
       ! Isotopes
       if (tr_iso) then
