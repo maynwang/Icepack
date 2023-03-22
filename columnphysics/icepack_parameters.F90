@@ -242,7 +242,7 @@
          cp_wv  = 1.81e3_dbl_kind    ,&! specific heat of water vapor (J/kg/K)
          zvir   = 0.606_dbl_kind     ,&! rh2o/rair - 1.0
          zref   = 10._dbl_kind       ,&! reference height for stability (m)
-         zTrf   = c2                 ,&! reference height for {T,Q,U}ref (m)
+         zTrf   = c2                 ,&! reference height for {T,Q}ref (m)
          iceruf = 0.0005_dbl_kind    ,&! ice surface roughness (m)
          qqqice = 11637800._dbl_kind ,&! for qsat over ice
          TTTice = 5897.8_dbl_kind    ,&! for qsat over ice
@@ -596,7 +596,7 @@
          cp_wv_in,      & ! specific heat of water vapor (J/kg/K)
          zvir_in,       & ! rh2o/rair - 1.0
          zref_in,       & ! reference height for stability (m)
-         zTrf_in,       & ! reference height for {T,Q,U}ref (m)
+         zTrf_in,       & ! reference height for {T,Q}ref (m)
          qqqice_in,     & ! for qsat over ice
          TTTice_in,     & ! for qsat over ice
          qqqocn_in,     & ! for qsat over ocn
@@ -1117,7 +1117,7 @@
          cp_wv_out,      & ! specific heat of water vapor (J/kg/K)
          zvir_out,       & ! rh2o/rair - 1.0
          zref_out,       & ! reference height for stability (m)
-         zTrf_out,       & ! reference height for {T,Q,U}ref (m)
+         zTrf_out,       & ! reference height for {T,Q}ref (m)
          qqqice_out,     & ! for qsat over ice
          TTTice_out,     & ! for qsat over ice
          qqqocn_out,     & ! for qsat over ocn
