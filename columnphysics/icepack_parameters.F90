@@ -243,6 +243,7 @@
          zvir   = 0.606_dbl_kind     ,&! rh2o/rair - 1.0
          zref   = 10._dbl_kind       ,&! reference height for stability (m)
          zTrf   = c2                 ,&! reference height for {T,Q}ref (m)
+         umin   = c1                 ,&! min wind speed for turbulent fluxes (m/s)
          iceruf = 0.0005_dbl_kind    ,&! ice surface roughness (m)
          qqqice = 11637800._dbl_kind ,&! for qsat over ice
          TTTice = 5897.8_dbl_kind    ,&! for qsat over ice
@@ -394,7 +395,7 @@
          stefan_boltzmann_in, ice_ref_salinity_in, &
          Tffresh_in, Lsub_in, Lvap_in, Timelt_in, Tsmelt_in, &
          iceruf_in, Cf_in, Pstar_in, Cstar_in, kappav_in, &
-         kice_in, kseaice_in, ksno_in, zTrf_in, &
+         kice_in, kseaice_in, ksno_in, zTrf_in, umin_in, &
          zref_in, hs_min_in, snowpatch_in, rhosi_in, sk_l_in, &
          saltmax_in, phi_init_in, min_salin_in, salt_loss_in, &
          min_bgc_in, dSin0_frazil_in, hi_ssl_in, hs_ssl_in, &
@@ -597,6 +598,7 @@
          zvir_in,       & ! rh2o/rair - 1.0
          zref_in,       & ! reference height for stability (m)
          zTrf_in,       & ! reference height for {T,Q}ref (m)
+         umin_in,       & ! min wind speed for turbulent fluxes (m/s)
          qqqice_in,     & ! for qsat over ice
          TTTice_in,     & ! for qsat over ice
          qqqocn_in,     & ! for qsat over ocn
@@ -767,6 +769,7 @@
       if (present(ksno_in)              ) ksno             = ksno_in
       if (present(zref_in)              ) zref             = zref_in
       if (present(zTrf_in)              ) zTrf             = zTrf_in
+      if (present(umin_in)              ) umin             = umin_in
       if (present(hs_min_in)            ) hs_min           = hs_min_in
       if (present(snowpatch_in)         ) snowpatch        = snowpatch_in
       if (present(rhosi_in)             ) rhosi            = rhosi_in
@@ -906,7 +909,7 @@
          stefan_boltzmann_out, ice_ref_salinity_out, &
          Tffresh_out, Lsub_out, Lvap_out, Timelt_out, Tsmelt_out, &
          iceruf_out, Cf_out, Pstar_out, Cstar_out, kappav_out, &
-         kice_out, kseaice_out, ksno_out, zTrf_out, &
+         kice_out, kseaice_out, ksno_out, zTrf_out, umin_out, &
          zref_out, hs_min_out, snowpatch_out, rhosi_out, sk_l_out, &
          saltmax_out, phi_init_out, min_salin_out, salt_loss_out, &
          min_bgc_out, dSin0_frazil_out, hi_ssl_out, hs_ssl_out, &
@@ -1118,6 +1121,7 @@
          zvir_out,       & ! rh2o/rair - 1.0
          zref_out,       & ! reference height for stability (m)
          zTrf_out,       & ! reference height for {T,Q}ref (m)
+         umin_out,       & ! min wind speed for turbulent fluxes (m/s)
          qqqice_out,     & ! for qsat over ice
          TTTice_out,     & ! for qsat over ice
          qqqocn_out,     & ! for qsat over ocn
@@ -1329,6 +1333,7 @@
       if (present(ksno_out)              ) ksno_out         = ksno
       if (present(zref_out)              ) zref_out         = zref
       if (present(zTrf_out)              ) zTrf_out         = zTrf
+      if (present(umin_out)              ) umin_out         = umin
       if (present(hs_min_out)            ) hs_min_out       = hs_min
       if (present(snowpatch_out)         ) snowpatch_out    = snowpatch
       if (present(rhosi_out)             ) rhosi_out        = rhosi
@@ -1506,6 +1511,7 @@
         write(iounit,*) "  ksno   = ",ksno
         write(iounit,*) "  zref   = ",zref
         write(iounit,*) "  zTrf   = ",zTrf
+        write(iounit,*) "  umin   = ",umin
         write(iounit,*) "  hs_min = ",hs_min
         write(iounit,*) "  snowpatch = ",snowpatch
         write(iounit,*) "  rhosi  = ",rhosi

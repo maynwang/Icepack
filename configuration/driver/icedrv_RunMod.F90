@@ -97,6 +97,7 @@
       use icedrv_diagnostics_bgc, only: hbrine_diags, zsal_diags, bgc_diags
       use icedrv_flux, only: init_history_therm, init_history_bgc, &
           daidtt, daidtd, dvidtt, dvidtd, dagedtt, dagedtd, init_history_dyn
+      use icepack_parameters, only: ktherm
       use icedrv_restart, only: dumpfile, final_restart
       use icedrv_restart_bgc, only: write_restart_bgc
       use icedrv_step, only: prep_radiation, step_therm1, step_therm2, &
@@ -142,7 +143,7 @@
       ! Scale radiation fields
       !-----------------------------------------------------------------
       
-      if (calc_Tsfc) call prep_radiation ()
+      if (calc_Tsfc .and. ktherm >= 0) call prep_radiation ()
 
 !      call icedrv_diagnostics_debug ('post prep_radiation')
 
@@ -151,8 +152,10 @@
       !-----------------------------------------------------------------
 
       call step_therm1     (dt) ! vertical thermodynamics
-      call biogeochemistry (dt) ! biogeochemistry
-      call step_therm2     (dt) ! ice thickness distribution thermo
+      if (ktherm >= 0) then
+         call biogeochemistry (dt) ! biogeochemistry
+         call step_therm2     (dt) ! ice thickness distribution thermo
+      endif
 
       ! clean up, update tendency diagnostics
       offset = dt
@@ -187,7 +190,8 @@
       ! albedo, shortwave radiation
       !-----------------------------------------------------------------
       
-      call step_radiation (dt)
+      if (ktherm >= 0) &
+         call step_radiation (dt)
 
       !-----------------------------------------------------------------
       ! get ready for coupling and the next time step

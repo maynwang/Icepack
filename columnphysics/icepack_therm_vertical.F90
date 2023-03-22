@@ -2455,18 +2455,20 @@
       ! Compute lateral and bottom heat fluxes.
       !-----------------------------------------------------------------
 
-      call frzmlt_bottom_lateral (dt,        ncat,      &
-                                  nilyr,     nslyr,     &
-                                  aice,      frzmlt,    &
-                                  vicen,     vsnon,     &
-                                  zqin,      zqsn,      &
-                                  sst,       Tf,        &
-                                  ustar_min,            &
-                                  fbot_xfer_type,       &
-                                  strocnxT,  strocnyT,  &
-                                  Tbot,      fbot,      &
-                                  rside,     Cdn_ocn,   &
-                                  fside)
+      if (ktherm >= 0) then
+         call frzmlt_bottom_lateral (dt,        ncat,      &
+                                    nilyr,     nslyr,     &
+                                    aice,      frzmlt,    &
+                                    vicen,     vsnon,     &
+                                    zqin,      zqsn,      &
+                                    sst,       Tf,        &
+                                    ustar_min,            &
+                                    fbot_xfer_type,       &
+                                    strocnxT,  strocnyT,  &
+                                    Tbot,      fbot,      &
+                                    rside,     Cdn_ocn,   &
+                                    fside)
+      endif
 
       if (icepack_warnings_aborted(subname)) return
 
@@ -2586,102 +2588,104 @@
       ! Vertical thermodynamics: Heat conduction, growth and melting.
       !----------------------------------------------------------------- 
 
-            if (.not.(calc_Tsfc)) then
+            if (ktherm >= 0) then
+               if (.not.(calc_Tsfc)) then
 
-               ! If not calculating surface temperature and fluxes, set 
-               ! surface fluxes (flatn, fsurfn, and fcondtopn) to be used 
-               ! in thickness_changes
- 
-               ! hadgem routine sets fluxes to default values in ice-only mode
-               call set_sfcflux(aicen      (n),                 &
-                                flatn_f    (n), fsensn_f   (n), &
-                                fcondtopn_f(n),                 &
-                                fsurfn_f   (n),                 &
-                                flatn      (n), fsensn     (n), &
-                                fsurfn     (n),                 &
-                                fcondtopn  (n))
-               if (icepack_warnings_aborted(subname)) return
-            endif
+                  ! If not calculating surface temperature and fluxes, set 
+                  ! surface fluxes (flatn, fsurfn, and fcondtopn) to be used 
+                  ! in thickness_changes
+   
+                  ! hadgem routine sets fluxes to default values in ice-only mode
+                  call set_sfcflux(aicen      (n),                 &
+                                   flatn_f    (n), fsensn_f   (n), &
+                                   fcondtopn_f(n),                 &
+                                   fsurfn_f   (n),                 &
+                                   flatn      (n), fsensn     (n), &
+                                   fsurfn     (n),                 &
+                                   fcondtopn  (n))
+                  if (icepack_warnings_aborted(subname)) return
+               endif
 
-            call thermo_vertical(nilyr,        nslyr,        &
-                                 dt,           aicen    (n), &
-                                 vicen    (n), vsnon    (n), &
-                                 Tsfc     (n), zSin   (:,n), &
-                                 zqin   (:,n), zqsn   (:,n), &
-                                 apnd     (n), hpnd     (n), &
-                                 tr_pond_topo, &
-                                 flw,          potT,         &
-                                 Qa,           rhoa,         &
-                                 fsnow,        fpond,        &
-                                 fbot,         Tbot,         &
-                                 Tsnice,        sss,          &
-                                 lhcoef,       shcoef,       &
-                                 fswsfcn  (n), fswintn  (n), &
-                                 Sswabsn(:,n), Iswabsn(:,n), &
-                                 fsurfn   (n), fcondtopn(n), &
-                                 fcondbotn(n),               &
-                                 fsensn   (n), flatn    (n), &
-                                 flwoutn,      evapn,        &
-                                 evapsn,       evapin,       &
-                                 freshn,       fsaltn,       &
-                                 fhocnn,                     &
-                                 melttn   (n), meltsn   (n), &
-                                 meltbn   (n),               &
-                                 congeln  (n), snoicen  (n), &
-                                 mlt_onset,    frz_onset,    &
-                                 yday,         dsnown   (n), &
-                                 prescribed_ice)
+               call thermo_vertical(nilyr,        nslyr,        &
+                                    dt,           aicen    (n), &
+                                    vicen    (n), vsnon    (n), &
+                                    Tsfc     (n), zSin   (:,n), &
+                                    zqin   (:,n), zqsn   (:,n), &
+                                    apnd     (n), hpnd     (n), &
+                                    tr_pond_topo, &
+                                    flw,          potT,         &
+                                    Qa,           rhoa,         &
+                                    fsnow,        fpond,        &
+                                    fbot,         Tbot,         &
+                                    Tsnice,        sss,          &
+                                    lhcoef,       shcoef,       &
+                                    fswsfcn  (n), fswintn  (n), &
+                                    Sswabsn(:,n), Iswabsn(:,n), &
+                                    fsurfn   (n), fcondtopn(n), &
+                                    fcondbotn(n),               &
+                                    fsensn   (n), flatn    (n), &
+                                    flwoutn,      evapn,        &
+                                    evapsn,       evapin,       &
+                                    freshn,       fsaltn,       &
+                                    fhocnn,                     &
+                                    melttn   (n), meltsn   (n), &
+                                    meltbn   (n),               &
+                                    congeln  (n), snoicen  (n), &
+                                    mlt_onset,    frz_onset,    &
+                                    yday,         dsnown   (n), &
+                                    prescribed_ice)
 
-            if (icepack_warnings_aborted(subname)) then
-               call icepack_warnings_add(subname//' ice: Vertical thermo error: ')
-               return
-            endif
+               if (icepack_warnings_aborted(subname)) then
+                  call icepack_warnings_add(subname//' ice: Vertical thermo error: ')
+                  return
+               endif
 
       !-----------------------------------------------------------------
       ! Total absorbed shortwave radiation
       !-----------------------------------------------------------------
 
-            fswabsn = fswsfcn(n) + fswintn(n) + fswthrun(n)
+               fswabsn = fswsfcn(n) + fswintn(n) + fswthrun(n)
 
       !-----------------------------------------------------------------
       ! Aerosol update
       !-----------------------------------------------------------------
 
-            if (tr_aero) then
-               call update_aerosol (dt,                             &
-                                    nilyr, nslyr, n_aero,           &
-                                    melttn     (n), meltsn     (n), &
-                                    meltbn     (n), congeln    (n), &
-                                    snoicen    (n), fsnow,          &
-                                    aerosno(:,:,n), aeroice(:,:,n), &
-                                    aicen_init (n), vicen_init (n), &
-                                    vsnon_init (n),                 &
-                                    vicen      (n), vsnon      (n), &
-                                    aicen      (n),                 &
-                                    faero_atm     ,  faero_ocn)
-               if (icepack_warnings_aborted(subname)) return
-            endif
+               if (tr_aero) then
+                  call update_aerosol (dt,                             &
+                                       nilyr, nslyr, n_aero,           &
+                                       melttn     (n), meltsn     (n), &
+                                       meltbn     (n), congeln    (n), &
+                                       snoicen    (n), fsnow,          &
+                                       aerosno(:,:,n), aeroice(:,:,n), &
+                                       aicen_init (n), vicen_init (n), &
+                                       vsnon_init (n),                 &
+                                       vicen      (n), vsnon      (n), &
+                                       aicen      (n),                 &
+                                       faero_atm     ,  faero_ocn)
+                  if (icepack_warnings_aborted(subname)) return
+               endif
 
-            if (tr_iso) then
-               call update_isotope (dt = dt, &
-                                    nilyr = nilyr, nslyr = nslyr, &
-                                    meltt = melttn(n),melts = meltsn(n),     &
-                                    meltb = meltbn(n),congel=congeln(n),    &
-                                    snoice=snoicen(n),evap=evapn,         & 
-                                    fsnow=fsnow,      Tsfc=Tsfc(n),       &
-                                    Qref_iso=Qrefn_iso(:),                 &
-                                    isosno=l_isosno(:,n),isoice=l_isoice(:,n), &
-                                    aice_old=aicen_init(n),vice_old=vicen_init(n), &
-                                    vsno_old=vsnon_init(n),                &
-                                    vicen=vicen(n),vsnon=vsnon(n),      &
-                                    aicen=aicen(n),                     &
-                                    fiso_atm=l_fiso_atm(:),                  &
-                                    fiso_evapn=fiso_evapn(:),                &
-                                    fiso_ocnn=fiso_ocnn(:),                 &
-                                    HDO_ocn=l_HDO_ocn,H2_16O_ocn=l_H2_16O_ocn,    &
-                                    H2_18O_ocn=l_H2_18O_ocn)
-               if (icepack_warnings_aborted(subname)) return
-            endif
+               if (tr_iso) then
+                  call update_isotope (dt = dt, &
+                                       nilyr = nilyr, nslyr = nslyr, &
+                                       meltt = melttn(n),melts = meltsn(n),     &
+                                       meltb = meltbn(n),congel=congeln(n),    &
+                                       snoice=snoicen(n),evap=evapn,         & 
+                                       fsnow=fsnow,      Tsfc=Tsfc(n),       &
+                                       Qref_iso=Qrefn_iso(:),                 &
+                                       isosno=l_isosno(:,n),isoice=l_isoice(:,n), &
+                                       aice_old=aicen_init(n),vice_old=vicen_init(n), &
+                                       vsno_old=vsnon_init(n),                &
+                                       vicen=vicen(n),vsnon=vsnon(n),      &
+                                       aicen=aicen(n),                     &
+                                       fiso_atm=l_fiso_atm(:),                  &
+                                       fiso_evapn=fiso_evapn(:),                &
+                                       fiso_ocnn=fiso_ocnn(:),                 &
+                                       HDO_ocn=l_HDO_ocn,H2_16O_ocn=l_H2_16O_ocn,    &
+                                       H2_18O_ocn=l_H2_18O_ocn)
+                  if (icepack_warnings_aborted(subname)) return
+               endif
+            endif ! ktherm >= 0
          endif   ! aicen_init
 
       !-----------------------------------------------------------------
@@ -2691,62 +2695,64 @@
       ! the surface fluxes are merged, below.
       !-----------------------------------------------------------------
 
-         !call ice_timer_start(timer_ponds)
-         if (tr_pond) then
-               
-            if (tr_pond_cesm) then
-               rfrac = rfracmin + (rfracmax-rfracmin) * aicen(n) 
-               call compute_ponds_cesm(dt,        hi_min,    &
-                                       pndaspect, rfrac,     &
-                                       melttn(n), meltsn(n), &
-                                       frain,                &
-                                       aicen (n), vicen (n), &
-                                       Tsfc  (n), &
-                                       apnd  (n), hpnd  (n))
-               if (icepack_warnings_aborted(subname)) return
+         if (ktherm >= 0) then
+            !call ice_timer_start(timer_ponds)
+            if (tr_pond) then
                   
-            elseif (tr_pond_lvl) then
-               rfrac = rfracmin + (rfracmax-rfracmin) * aicen(n)
-               call compute_ponds_lvl(dt,        nilyr,     &
-                                      ktherm,               &
-                                      hi_min,               &
-                                      dpscale,   frzpnd,    &
-                                      pndaspect, rfrac,     &
-                                      melttn(n), meltsn(n), &
-                                      frain,     Tair,      &
-                                      fsurfn(n),            &
-                                      dhsn  (n), ffracn(n), &
-                                      aicen (n), vicen (n), &
-                                      vsnon (n),            &
-                                      zqin(:,n), zSin(:,n), &
-                                      Tsfc  (n), alvl  (n), &
-                                      apnd  (n), hpnd  (n), &
-                                      ipnd  (n))
-               if (icepack_warnings_aborted(subname)) return
-                  
-            elseif (tr_pond_topo) then
-               if (aicen_init(n) > puny) then
+               if (tr_pond_cesm) then
+                  rfrac = rfracmin + (rfracmax-rfracmin) * aicen(n) 
+                  call compute_ponds_cesm(dt,        hi_min,    &
+                                          pndaspect, rfrac,     &
+                                          melttn(n), meltsn(n), &
+                                          frain,                &
+                                          aicen (n), vicen (n), &
+                                          Tsfc  (n), &
+                                          apnd  (n), hpnd  (n))
+                  if (icepack_warnings_aborted(subname)) return
                      
-                  ! collect liquid water in ponds
-                  ! assume salt still runs off
+               elseif (tr_pond_lvl) then
                   rfrac = rfracmin + (rfracmax-rfracmin) * aicen(n)
-                  pond = rfrac/rhofresh * (melttn(n)*rhoi &
-                       +                   meltsn(n)*rhos &
-                       +                   frain *dt)
+                  call compute_ponds_lvl(dt,        nilyr,     &
+                                         ktherm,               &
+                                         hi_min,               &
+                                         dpscale,   frzpnd,    &
+                                         pndaspect, rfrac,     &
+                                         melttn(n), meltsn(n), &
+                                         frain,     Tair,      &
+                                         fsurfn(n),            &
+                                         dhsn  (n), ffracn(n), &
+                                         aicen (n), vicen (n), &
+                                         vsnon (n),            &
+                                         zqin(:,n), zSin(:,n), &
+                                         Tsfc  (n), alvl  (n), &
+                                         apnd  (n), hpnd  (n), &
+                                         ipnd  (n))
+                  if (icepack_warnings_aborted(subname)) return
+                     
+               elseif (tr_pond_topo) then
+                  if (aicen_init(n) > puny) then
+                        
+                     ! collect liquid water in ponds
+                     ! assume salt still runs off
+                     rfrac = rfracmin + (rfracmax-rfracmin) * aicen(n)
+                     pond = rfrac/rhofresh * (melttn(n)*rhoi &
+                          +                   meltsn(n)*rhos &
+                          +                   frain *dt)
 
-                  ! if pond does not exist, create new pond over full ice area
-                  ! otherwise increase pond depth without changing pond area
-                  if (apnd(n) < puny) then
-                     hpnd(n) = c0
-                     apnd(n) = c1
-                  endif
-                  hpnd(n) = (pond + hpnd(n)*apnd(n)) / apnd(n)
-                  fpond = fpond + pond * aicen(n) ! m
-               endif ! aicen_init
-            endif
+                     ! if pond does not exist, create new pond over full ice area
+                     ! otherwise increase pond depth without changing pond area
+                     if (apnd(n) < puny) then
+                        hpnd(n) = c0
+                        apnd(n) = c1
+                     endif
+                     hpnd(n) = (pond + hpnd(n)*apnd(n)) / apnd(n)
+                     fpond = fpond + pond * aicen(n) ! m
+                  endif ! aicen_init
+               endif
 
-         endif ! tr_pond
-         !call ice_timer_stop(timer_ponds)
+            endif ! tr_pond
+            !call ice_timer_stop(timer_ponds)
+         endif ! ktherm >= 0
 
       !-----------------------------------------------------------------
       ! Increment area-weighted fluxes.
@@ -2836,7 +2842,7 @@
       ! Calculate ponds from the topographic scheme
       !-----------------------------------------------------------------
       !call ice_timer_start(timer_ponds)
-      if (tr_pond_topo) then
+      if (tr_pond_topo .and. ktherm >= 0) then
          call compute_ponds_topo(dt,       ncat,      nilyr,     &
                                  ktherm,   heat_capacity,        &
                                  aice,     aicen,                &
