@@ -2112,7 +2112,7 @@
                                     lmask_n     , lmask_s     , &
                                     mlt_onset   , frz_onset   , &
                                     yday        , prescribed_ice, &
-                                    zlvs)
+                                    zlvs        , Qsur        )
 
       integer (kind=int_kind), intent(in) :: &
          ncat    , & ! number of thickness categories
@@ -2283,15 +2283,15 @@
       real (kind=dbl_kind), dimension(:,:), optional, intent(inout) :: &
          isosno     , &  ! snow isotope tracer (kg/m^2)
          isoice          ! ice isotope tracer (kg/m^2)
+
+      real (kind=dbl_kind), optional, intent(out) :: &
+         Qsur            ! surface specific humidity (kg/kg)
 !autodocument_end
 
       ! local variables
 
       integer (kind=int_kind) :: &
          n               ! category index
-
-      real (kind=dbl_kind) :: &
-         worka, workb    ! temporary variables
 
       ! 2D coupler variables (computed for each category, then aggregated)
       real (kind=dbl_kind) :: &
@@ -2309,6 +2309,9 @@
          Trefn       , & ! air tmp reference level                (K)
          Urefn       , & ! air speed reference level            (m/s)
          Qrefn       , & ! air sp hum reference level         (kg/kg)
+         delqn       , & ! humidity difference (per category) (kg/kg)
+         delq        , & ! humidity difference (aggregated)   (kg/kg)
+         delt        , & ! potential T difference                 (K)
          shcoef      , & ! transfer coefficient for sensible heat
          lhcoef      , & ! transfer coefficient for latent heat
          rfrac           ! water fraction retained for melt ponds
@@ -2496,6 +2499,8 @@
          if (icepack_warnings_aborted(subname)) return
       endif
 
+      delq   = c0
+
       do n = 1, ncat
 
          meltsn (n) = c0
@@ -2513,8 +2518,8 @@
          Urefn  = c0
          lhcoef = c0
          shcoef = c0
-         worka  = c0
-         workb  = c0
+         delt   = c0
+         delqn  = c0
 
          fswabsn = c0
          flwoutn = c0
@@ -2545,7 +2550,7 @@
                                         Qa,       rhoa,          &
                                         strairxn, strairyn,      &
                                         Trefn,    Qrefn,         &
-                                        worka,    workb,         &
+                                        delt,     delqn,         &
                                         lhcoef,   shcoef,        &
                                         Cdn_atm,                 &
                                         Cdn_atm_ratio_n,         &
@@ -2800,6 +2805,7 @@
                                meltb=meltb,       congel=congel,    &
                                snoice=snoice,                       &
                                Uref=Uref,  Urefn=Urefn,  &
+                               delq=delq,  delqn=delqn,  &
                                Qref_iso=l_Qref_iso,      &
                                Qrefn_iso=Qrefn_iso,      &
                                fiso_ocn=l_fiso_ocn,      &
@@ -2837,6 +2843,9 @@
       deallocate(l_fswthrun_vdf)
       deallocate(l_fswthrun_idr)
       deallocate(l_fswthrun_idf)
+
+      ! Compute surface specific humidity
+      if (present(Qsur)) Qsur = Qa - delq
 
       !-----------------------------------------------------------------
       ! Calculate ponds from the topographic scheme
