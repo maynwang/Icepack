@@ -2648,6 +2648,8 @@
 
                if (icepack_warnings_aborted(subname)) then
                   call icepack_warnings_add(subname//' ice: Vertical thermo error: ')
+                  write(warnstr,*) subname, ' Category: ', n
+                  call icepack_warnings_add(warnstr)
                   return
                endif
 
