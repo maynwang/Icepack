@@ -2312,6 +2312,7 @@
          Trefn       , & ! air tmp reference level                (K)
          Urefn       , & ! air speed reference level            (m/s)
          Qrefn       , & ! air sp hum reference level         (kg/kg)
+         Qsurn       , & ! surface specific humidity          (kg/kg)
          delqn       , & ! humidity difference (per category) (kg/kg)
          delq        , & ! humidity difference (aggregated)   (kg/kg)
          delt        , & ! potential T difference                 (K)
@@ -2503,6 +2504,7 @@
       endif
 
       delq   = c0
+      if(present(Qsur)) Qsur = c0
       if(present(ilmo)) ilmo = c0
 
       do n = 1, ncat
@@ -2524,6 +2526,7 @@
          shcoef = c0
          delt   = c0
          delqn  = c0
+         Qsurn  = c0
          ilmon  = c0
 
          fswabsn = c0
@@ -2565,6 +2568,9 @@
                                         Uref=Urefn, zlvs=zlvs,   &
                                         ilmo=ilmon               )
                if (icepack_warnings_aborted(subname)) return
+
+               ! Compute surface specific humidity
+               Qsurn = Qa - delqn
 
             endif   ! calc_Tsfc or calc_strair
 
@@ -2813,7 +2819,7 @@
                                meltb=meltb,       congel=congel,    &
                                snoice=snoice,                       &
                                Uref=Uref,  Urefn=Urefn,  &
-                               delq=delq,  delqn=delqn,  &
+                               Qsur=Qsur,  Qsurn=Qsurn,  &
                                ilmo=ilmo,  ilmon=ilmon,  &
                                Qref_iso=l_Qref_iso,      &
                                Qrefn_iso=Qrefn_iso,      &
@@ -2852,9 +2858,6 @@
       deallocate(l_fswthrun_vdf)
       deallocate(l_fswthrun_idr)
       deallocate(l_fswthrun_idf)
-
-      ! Compute surface specific humidity
-      if (present(Qsur)) Qsur = Qa - delq
 
       !-----------------------------------------------------------------
       ! Calculate ponds from the topographic scheme

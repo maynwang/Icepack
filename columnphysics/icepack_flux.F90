@@ -61,7 +61,7 @@
                                meltb,                &
                                congel,  snoice,      &
                                Uref,     Urefn,      &
-                               delq,     delqn,      &
+                               Qsur,     Qsurn,      &
                                ilmo,     ilmon,      &
                                Qref_iso, Qrefn_iso,  &
                                fiso_ocn, fiso_ocnn,  &
@@ -87,7 +87,7 @@
           Trefn   , & ! air tmp reference level         (K)
           Qrefn   , & ! air sp hum reference level      (kg/kg)
           Urefn   , & ! air speed reference level       (m/s)
-          delqn   , & ! humidity difference             (kg/kg)
+          Qsurn   , & ! surface specific humidity       (kg/kg)
           freshn  , & ! fresh water flux to ocean       (kg/m2/s)
           fsaltn  , & ! salt flux to ocean              (kg/m2/s)
           fhocnn  , & ! actual ocn/ice heat flx         (W/m**2)
@@ -120,7 +120,7 @@
           Tref    , & ! air tmp reference level         (K)
           Qref    , & ! air sp hum reference level      (kg/kg)
           Uref    , & ! air speed reference level       (m/s)
-          delq    , & ! humidity difference             (kg/kg)
+          Qsur    , & ! surface specific humidity       (kg/kg)
           fresh   , & ! fresh water flux to ocean       (kg/m2/s)
           fsalt   , & ! salt flux to ocean              (kg/m2/s)
           fhocn   , & ! actual ocn/ice heat flx         (W/m**2)
@@ -180,7 +180,7 @@
       Tref       = Tref     + Trefn     * aicen
       Qref       = Qref     + Qrefn     * aicen
       Uref       = Uref     + Urefn     * aicen
-      delq       = delq     + delqn     * aicen
+      Qsur       = Qsur     + Qsurn     * aicen
 
       if (present(ilmo) .and. present(ilmon)) &
          ilmo    = ilmo     + ilmon     * aicen
