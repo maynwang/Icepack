@@ -373,7 +373,7 @@
       else
          hols  = hols*zTrf/zlvl
       endif
-      psix2 = -c5*hols*stables + (c1-stables)*psi_scalar_unstable(hols)
+      psix2 = psi_stable_jordan(hols)*stables + (c1-stables)*psi_scalar_unstable(hols)
       fac   = (rh/vonkar) &
             * (alzs + al2 - psixh + psix2)
       Tref  = potT - delt*fac
