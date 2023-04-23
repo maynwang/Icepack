@@ -138,6 +138,7 @@
          fac   , & ! interpolation factor
          al2   , & ! ln(z10   /zTrf)
          psix2 , & ! stability function at zTrf   (heat and water)
+         psim10, & ! stability function at zref   (momentum)
          psimhs, & ! stable profile
          ssq   , & ! sat surface humidity     (kg/kg)
          qqq   , & ! for qsat, dqsfcdt
@@ -386,6 +387,14 @@
          Uref = sqrt((uatm-uvel)**2 + (vatm-vvel)**2) * rd / rdn
       else
          Uref = vmag * rd / rdn
+         
+         ! compute Uref as in CICE4-CMC
+         holm     = holm*zref/zlvl
+         psim10   = psi_stable_jordan(holm)*stablem + (c1-stablem)*psi_momentum_unstable(holm)
+         fac      = (rd/vonkar) &
+                  * (alzm - psimh + psim10)
+         !Note al10=log(zref/zref)=0
+         Uref     = max( vmag - vmag*fac , c0 )
       endif
 
       if (l_iso_flag) then
