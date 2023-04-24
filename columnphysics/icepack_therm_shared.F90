@@ -11,7 +11,7 @@
       use icepack_parameters, only: c0, c1, c2, c4, p5, pi
       use icepack_parameters, only: cp_ocn, cp_ice, rhoi, rhos, Tffresh, TTTice, qqqice
       use icepack_parameters, only: stefan_boltzmann, emissivity, Lfresh, Tsmelt
-      use icepack_parameters, only: saltmax, min_salin, depressT
+      use icepack_parameters, only: saltmax, min_salin, depressT, Tocnfrz
       use icepack_parameters, only: ktherm, heat_capacity, tfrz_option
       use icepack_parameters, only: calc_Tsfc
       use icepack_warnings, only: warnstr, icepack_warnings_add
@@ -368,7 +368,20 @@
 
         else
 
+#ifndef CICE_IN_NEMO
            Tmlt = -depressT * Sin
+#else
+           if     (trim(tfrz_option) == 'constant') then
+              Tmlt = Tocnfrz
+           elseif (trim(tfrz_option) == 'nonlin')   then
+              ! this causes circular dependencies, so the computation is copied here
+              ! call eos_fzp(Sin, Tmlt)
+              Tmlt = ( - 0.0575_dbl_kind + 1.710523e-3_dbl_kind * sqrt( Sin )   &
+                       - 2.154996e-4_dbl_kind * Sin ) * Sin
+           else ! 'linear_salt'
+              Tmlt = -depressT * Sin
+           endif
+#endif
 
         endif
 
