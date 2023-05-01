@@ -326,8 +326,13 @@
           if (ktherm == 2) then
             qin(k) = enthalpy_mush(Ti, Sprofile(k))
           else
-            qin(k) = -(rhoi * (cp_ice*(Tprofile(k)-Ti) &
-                + Lfresh*(c1-Tprofile(k)/Ti) - cp_ocn*Tprofile(k)))
+            if (Ti /= c0) then
+               qin(k) = -(rhoi * (cp_ice*(Tprofile(k)-Ti) &
+                   + Lfresh*(c1-Tprofile(k)/Ti) - cp_ocn*Tprofile(k)))
+            else
+               ! special case, Tf=0 (fresh water) and Tsfc=Tsmelt=0 (Tair > 0)
+               qin(k) = -rhoi*(Lfresh -cp_ice*Ti)
+            endif
           endif
         enddo               ! nilyr
         
