@@ -2112,7 +2112,8 @@
                                     lmask_n     , lmask_s     , &
                                     mlt_onset   , frz_onset   , &
                                     yday        , prescribed_ice, &
-                                    zlvs        , Qsur        )
+                                    zlvs        , Qsur        , &
+                                    ilmo        )
 
       integer (kind=int_kind), intent(in) :: &
          ncat    , & ! number of thickness categories
@@ -2285,7 +2286,8 @@
          isoice          ! ice isotope tracer (kg/m^2)
 
       real (kind=dbl_kind), optional, intent(out) :: &
-         Qsur            ! surface specific humidity (kg/kg)
+         Qsur       , &  ! surface specific humidity (kg/kg)
+         ilmo            ! inverse Obukov lengthscale (1/m)
 !autodocument_end
 
       ! local variables
@@ -2306,6 +2308,7 @@
          strairxn    , & ! air/ice zonal  stress,             (N/m^2)
          strairyn    , & ! air/ice meridional stress,         (N/m^2)
          Cdn_atm_ratio_n, & ! drag coefficient ratio
+         ilmon       , & ! inverse Obukov lengthscale           (1/m)
          Trefn       , & ! air tmp reference level                (K)
          Urefn       , & ! air speed reference level            (m/s)
          Qrefn       , & ! air sp hum reference level         (kg/kg)
@@ -2500,6 +2503,7 @@
       endif
 
       delq   = c0
+      if(present(ilmo)) ilmo = c0
 
       do n = 1, ncat
 
@@ -2520,6 +2524,7 @@
          shcoef = c0
          delt   = c0
          delqn  = c0
+         ilmon  = c0
 
          fswabsn = c0
          flwoutn = c0
@@ -2557,7 +2562,8 @@
                                         Qa_iso=l_Qa_iso,           &
                                         Qref_iso=Qrefn_iso,      &
                                         uvel=uvel, vvel=vvel,    &
-                                        Uref=Urefn, zlvs=zlvs)
+                                        Uref=Urefn, zlvs=zlvs,   &
+                                        ilmo=ilmon               )
                if (icepack_warnings_aborted(subname)) return
 
             endif   ! calc_Tsfc or calc_strair
@@ -2642,6 +2648,8 @@
 
                if (icepack_warnings_aborted(subname)) then
                   call icepack_warnings_add(subname//' ice: Vertical thermo error: ')
+                  write(warnstr,*) subname, ' Category: ', n
+                  call icepack_warnings_add(warnstr)
                   return
                endif
 
@@ -2806,6 +2814,7 @@
                                snoice=snoice,                       &
                                Uref=Uref,  Urefn=Urefn,  &
                                delq=delq,  delqn=delqn,  &
+                               ilmo=ilmo,  ilmon=ilmon,  &
                                Qref_iso=l_Qref_iso,      &
                                Qrefn_iso=Qrefn_iso,      &
                                fiso_ocn=l_fiso_ocn,      &
