@@ -79,6 +79,7 @@
          cc1 = Lfresh * Tmltk
          Tin =  min((-bb1 - sqrt(bb1*bb1 - c4*aa1*cc1)) /  &
                          (c2*aa1),Tmltk)
+         
 
       else                ! fresh ice
          Tin = (Lfresh + qin/rhoi) / cp_ice

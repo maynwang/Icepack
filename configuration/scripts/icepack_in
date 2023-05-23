@@ -86,6 +86,7 @@
     calc_strair     = .true.
     calc_Tsfc       = .true.
     init_SIMBA      = .true.
+    tr_snowice      = .false.
     highfreq        = .false.
     natmiter        = 5
     atmiter_conv    = 0.0d0

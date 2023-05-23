@@ -105,7 +105,7 @@
       real (kind=dbl_kind) :: atmiter_conv
 
       logical (kind=log_kind) :: calc_Tsfc, formdrag, highfreq, calc_strair, calc_dragio
-      logical (kind=log_kind) :: conserv_check, init_SIMBA
+      logical (kind=log_kind) :: conserv_check, init_SIMBA, tr_snowice
 
       integer (kind=int_kind) :: ntrcr
       logical (kind=log_kind) :: tr_iage, tr_FY, tr_lvl, tr_pond
@@ -163,7 +163,7 @@
         formdrag,        highfreq,        natmiter,        &
         atmiter_conv,    calc_dragio,                      &
         tfrz_option,     default_season,  wave_spec_type,  &
-        init_SIMBA,                                        &
+        init_SIMBA,      tr_snowice,                       &
         precip_units,    fyear_init,      ycycle,          &
         atm_data_type,   ocn_data_type,   bgc_data_type,   &
         atm_data_file,   ocn_data_file,   bgc_data_file,   &
@@ -216,7 +216,7 @@
            fbot_xfer_type_out=fbot_xfer_type, puny_out=puny, &
            wave_spec_type_out=wave_spec_type, &
            sw_redist_out=sw_redist, sw_frac_out=sw_frac, sw_dtemp_out=sw_dtemp, &
-           init_SIMBA_out=init_SIMBA)
+           init_SIMBA_out=init_SIMBA, tr_snowice_out = tr_snowice)
 
       call icepack_warnings_flush(nu_diag)
       if (icepack_warnings_aborted()) call icedrv_system_abort(string=subname, &
@@ -790,7 +790,7 @@
            fbot_xfer_type_in=fbot_xfer_type, &
            wave_spec_type_in=wave_spec_type, wave_spec_in=wave_spec, &
            sw_redist_in=sw_redist, sw_frac_in=sw_frac, sw_dtemp_in=sw_dtemp, &
-           init_SIMBA_in=init_SIMBA)
+           init_SIMBA_in=init_SIMBA, tr_snowice_in = tr_snowice)
       call icepack_init_tracer_sizes(ntrcr_in=ntrcr, &
            ncat_in=ncat, nilyr_in=nilyr, nslyr_in=nslyr, nblyr_in=nblyr, &
            nfsd_in=nfsd, n_iso_in=n_iso, n_aero_in=n_aero)
@@ -1171,7 +1171,8 @@
       real (kind=dbl_kind), parameter :: &
          hsno_init = 0.25_dbl_kind   ! initial snow thickness (m)
 
-      logical (kind=log_kind) :: tr_brine, tr_lvl, tr_fsd, init_SIMBA
+      logical (kind=log_kind) :: tr_brine, tr_lvl, tr_fsd
+      logical (kind=log_kind) :: init_SIMBA, tr_snowice
       integer (kind=int_kind) :: nt_Tsfc, nt_qice, nt_qsno, nt_sice, nt_fsd
       integer (kind=int_kind) :: nt_fbri, nt_alvl, nt_vlvl
 

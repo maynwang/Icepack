@@ -151,6 +151,8 @@
          calc_Tsfc     = .true. ,&! if true, calculate surface temperature
                                   ! if false, Tsfc is computed elsewhere and
                                   ! atmos-ice fluxes are provided to CICE
+         tr_snowice    = .true. ,&! if true, converte snow to snow-ice if there is 
+                                  ! hydrostatic imbalance  
          init_SIMBA    = .true. ,&! if true, the initial ice condition is taken from
 				  ! SIMBA buoy outputs
          update_ocn_f = .false. ,&! include fresh water and salt fluxes for frazil
@@ -427,7 +429,8 @@
          fr_dFe_in, k_nitrif_in, t_iron_conv_in, max_loss_in, &
          max_dfe_doc1_in, fr_resp_s_in, conserv_check_in, &
          y_sk_DMS_in, t_sk_conv_in, t_sk_ox_in, frazil_scav_in, &
-         sw_redist_in, sw_frac_in, sw_dtemp_in, init_SIMBA_in)
+         sw_redist_in, sw_frac_in, sw_dtemp_in, init_SIMBA_in, &
+         tr_snowice_in )
 
       !-----------------------------------------------------------------
       ! parameter constants
@@ -497,7 +500,9 @@
                             ! if false, Tsfc is computed elsewhere and
                             ! atmos-ice fluxes are provided to CICE
          init_SIMBA_in   , &! if true, use initial thickness and surface temperature
-                            ! from SIMBA data                    
+                            ! from SIMBA data      
+         tr_snowice_in   , &! if true, converte snow to snow-ice if there is 
+                            ! hydrostatic imbalance                
          update_ocn_f_in    ! include fresh water and salt fluxes for frazil
 
       real (kind=dbl_kind), intent(in), optional :: &
@@ -892,6 +897,7 @@
       if (present(sw_redist_in)         ) sw_redist        = sw_redist_in
       if (present(sw_frac_in)           ) sw_frac          = sw_frac_in
       if (present(sw_dtemp_in)          ) sw_dtemp         = sw_dtemp_in
+      if (present(tr_snowice_in)        ) tr_snowice       = tr_snowice_in
 
       call icepack_recompute_constants()
       if (icepack_warnings_aborted(subname)) return
@@ -945,7 +951,8 @@
          fr_mort2min_out, fr_resp_s_out, fr_dFe_out, &
          k_nitrif_out, t_iron_conv_out, max_loss_out, max_dfe_doc1_out, &
          y_sk_DMS_out, t_sk_conv_out, t_sk_ox_out, frazil_scav_out, &
-         sw_redist_out, sw_frac_out, sw_dtemp_out, init_SIMBA_out)
+         sw_redist_out, sw_frac_out, sw_dtemp_out, &
+         init_SIMBA_out, tr_snowice_out)
 
       !-----------------------------------------------------------------
       ! parameter constants
@@ -1024,7 +1031,9 @@
                             ! if false, Tsfc is computed elsewhere and
                             ! atmos-ice fluxes are provided to CICE
          init_SIMBA_out   ,&! if true, get thickness and surface temperature
-                            ! from the SIMBA Buoy data                    
+                            ! from the SIMBA Buoy data                               
+         tr_snowice_out   ,&! if true, converte snow to snow-ice if there is 
+                            ! hydrostatic imbalance   
          update_ocn_f_out   ! include fresh water and salt fluxes for frazil
 
       real (kind=dbl_kind), intent(out), optional :: &
@@ -1376,6 +1385,7 @@
       if (present(heat_capacity_out)     ) heat_capacity_out= heat_capacity
       if (present(calc_Tsfc_out)         ) calc_Tsfc_out    = calc_Tsfc
       if (present(init_SIMBA_out)        ) init_SIMBA_out   = init_SIMBA
+      if (present(tr_snowice_out)        ) tr_snowice_out   = tr_snowice
       if (present(update_ocn_f_out)      ) update_ocn_f_out = update_ocn_f
       if (present(dts_b_out)             ) dts_b_out        = dts_b
       if (present(ustar_min_out)         ) ustar_min_out    = ustar_min
@@ -1562,7 +1572,8 @@
         write(iounit,*) "  fbot_xfer_type    = ", fbot_xfer_type
         write(iounit,*) "  heat_capacity     = ", heat_capacity
         write(iounit,*) "  calc_Tsfc         = ", calc_Tsfc
-        write(iounit,*) "  init_SIMBA         = ", init_SIMBA
+        write(iounit,*) "  init_SIMBA        = ", init_SIMBA
+        write(iounit,*) "  tr_snowice        = ", tr_snowice
         write(iounit,*) "  update_ocn_f      = ", update_ocn_f
         write(iounit,*) "  dts_b             = ", dts_b
         write(iounit,*) "  ustar_min         = ", ustar_min

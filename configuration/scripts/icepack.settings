@@ -11,7 +11,7 @@ setenv ICE_RUNDIR     /glade/scratch/tcraig/ICEPACK_RUNS/${ICE_CASENAME}
 setenv ICE_OBJDIR     ${ICE_RUNDIR}/compile
 setenv ICE_RSTDIR     ${ICE_RUNDIR}/restart
 setenv ICE_HSTDIR     ${ICE_RUNDIR}/history
-setenv ICE_LOGDIR     ${ICE_CASEDIR}/logs
+setenv ICE_LOGDIR     ${ICE_RUNDIR}/logs
 setenv ICE_RSTPFILE   undefined
 setenv ICE_DRVOPT     icepack
 setenv ICE_IOTYPE     none    # set to none if netcdf library is unavailable
@@ -41,7 +41,7 @@ if (${ICE_NTHRDS} > 1) setenv ICE_THREADED  true
 ### Layers and Categories
 setenv NICELYR   7         # number of vertical layers in the ice
 setenv NSNWLYR   1         # number of vertical layers in the snow
-setenv NICECAT   5         # number of ice thickness categories
+setenv NICECAT   1         # number of ice thickness categories
 setenv NFSDCAT   1         # number of floe size categories
 
 ### Tracers                # match icepack_in tracer_nml to conserve memory

@@ -23,7 +23,7 @@
       use icepack_parameters, only: c0, c1, p001, p5, puny
       use icepack_parameters, only: pi, depressT, Lvap, hs_min, cp_ice, min_salin
       use icepack_parameters, only: cp_ocn, rhow, rhoi, rhos, Lfresh, rhofresh, ice_ref_salinity
-      use icepack_parameters, only: ktherm, heat_capacity, calc_Tsfc
+      use icepack_parameters, only: ktherm, heat_capacity, calc_Tsfc, tr_snowice
       use icepack_parameters, only: ustar_min, fbot_xfer_type, formdrag, calc_strair
       use icepack_parameters, only: rfracmin, rfracmax, pndaspect, dpscale, frzpnd
       use icepack_parameters, only: phi_i_mushy, floeshape, floediam
@@ -1495,7 +1495,8 @@
     ! Convert snow to ice if snow lies below freeboard.
     !-------------------------------------------------------------------
 
-      if (ktherm /= 2) &
+      if (ktherm /= 2) then
+        if (tr_snowice) then
          call freeboard (nslyr, &
                          snoice, &
                          hin,      hsn,      &
@@ -1503,6 +1504,8 @@
                          dzi,      dzs,      &
                          dsnow)
          if (icepack_warnings_aborted(subname)) return
+        endif
+      endif
 
 !---!-------------------------------------------------------------------
 !---! Repartition the ice and snow into equal-thickness layers,
