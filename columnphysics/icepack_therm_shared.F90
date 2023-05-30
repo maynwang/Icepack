@@ -11,7 +11,7 @@
       use icepack_parameters, only: c0, c1, c2, c4, p5, pi
       use icepack_parameters, only: cp_ocn, cp_ice, rhoi, rhos, Tffresh, TTTice, qqqice
       use icepack_parameters, only: stefan_boltzmann, emissivity, Lfresh, Tsmelt
-      use icepack_parameters, only: saltmax, min_salin, depressT
+      use icepack_parameters, only: saltmax, min_salin, depressT, Tocnfrz
       use icepack_parameters, only: ktherm, heat_capacity, tfrz_option
       use icepack_parameters, only: calc_Tsfc
       use icepack_warnings, only: warnstr, icepack_warnings_add
@@ -326,8 +326,13 @@
           if (ktherm == 2) then
             qin(k) = enthalpy_mush(Ti, Sprofile(k))
           else
-            qin(k) = -(rhoi * (cp_ice*(Tprofile(k)-Ti) &
-                + Lfresh*(c1-Tprofile(k)/Ti) - cp_ocn*Tprofile(k)))
+            if (Ti /= c0) then
+               qin(k) = -(rhoi * (cp_ice*(Tprofile(k)-Ti) &
+                   + Lfresh*(c1-Tprofile(k)/Ti) - cp_ocn*Tprofile(k)))
+            else
+               ! special case, Tf=0 (fresh water) and Tsfc=Tsmelt=0 (Tair > 0)
+               qin(k) = -rhoi*(Lfresh -cp_ice*Ti)
+            endif
           endif
         enddo               ! nilyr
         
@@ -368,7 +373,20 @@
 
         else
 
+#ifndef CICE_IN_NEMO
            Tmlt = -depressT * Sin
+#else
+           if     (trim(tfrz_option) == 'constant') then
+              Tmlt = Tocnfrz
+           elseif (trim(tfrz_option) == 'nonlin')   then
+              ! this causes circular dependencies, so the computation is copied here
+              ! call eos_fzp(Sin, Tmlt)
+              Tmlt = ( - 0.0575_dbl_kind + 1.710523e-3_dbl_kind * sqrt( Sin )   &
+                       - 2.154996e-4_dbl_kind * Sin ) * Sin
+           else ! 'linear_salt'
+              Tmlt = -depressT * Sin
+           endif
+#endif
 
         endif
 
