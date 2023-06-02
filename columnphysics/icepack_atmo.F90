@@ -1045,9 +1045,7 @@
 
       stable = p5 + sign(p5 , hol)
 
-      psi_stable = -(0.7_dbl_kind*hol &
-                 + 0.75_dbl_kind*(hol-14.3_dbl_kind) &
-                 * exp(-0.35_dbl_kind*hol) + 10.7_dbl_kind)
+      psi_stable = psi_stable_jordan(hol)
 
       if(trim(qty) == 'momentum') then
          psi_unstable = psi_momentum_unstable(hol)
@@ -1094,6 +1092,18 @@
       psi_scalar_unstable =  c2 * log((c1 + xd*xd)/c2)
 
       end function psi_scalar_unstable
+
+!=======================================================================
+
+      real(kind=dbl_kind) function psi_stable_jordan(hol) result(psi_stable)
+
+      real(kind=dbl_kind), intent(in) :: hol
+
+      psi_stable = -(0.7_dbl_kind*hol &
+                 + 0.75_dbl_kind*(hol-14.3_dbl_kind) &
+                 * exp(-0.35_dbl_kind*hol) + 10.7_dbl_kind)
+
+      end function psi_stable_jordan
 
 !=======================================================================
 
