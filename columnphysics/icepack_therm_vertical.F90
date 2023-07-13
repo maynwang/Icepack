@@ -1265,14 +1265,13 @@
 
       if (ktherm == 2) then
 
-         qbotm = enthalpy_mush(Tbot, sss)
+         qbotm = enthalpy_mush(Tbot, sss*(phi_i_mushy))
          qbotp = -Lfresh * rhoi * (c1 - phi_i_mushy)
          qbot0 = qbotm - qbotp
 
          dhi = ebot_gro / qbotp     ! dhi > 0
-
          hqtot = dzi(nilyr)*zqin(nilyr) + dhi*qbotm
-         hstot = dzi(nilyr)*zSin(nilyr) + dhi*sss
+         hstot = dzi(nilyr)*zSin(nilyr) + dhi*sss*(phi_i_mushy)
          emlt_ocn = emlt_ocn - qbot0 * dhi
 
       else
@@ -1638,6 +1637,11 @@
          emlt_atm = c0
          emlt_ocn = c0
       endif
+
+
+      print *, qbotm, qbotp, qbot0
+      print *, fhocnn, emlt_ocn,hqtot
+      !stop
 
       ! melt water is no longer zero enthalpy with ktherm=2
       fhocnn = fhocnn + emlt_ocn/dt
