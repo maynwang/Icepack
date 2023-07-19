@@ -10,6 +10,7 @@ module icepack_therm_mushy
   use icepack_parameters, only: a_rapid_mode, Rac_rapid_mode
   use icepack_parameters, only: aspect_rapid_mode, dSdt_slow_mode, phi_c_slow_mode
   use icepack_parameters, only: sw_redist, sw_frac, sw_dtemp
+  use icepack_parameters, only: ferrmax
   use icepack_mushy_physics, only: icepack_mushy_density_brine, enthalpy_brine, enthalpy_snow
   use icepack_mushy_physics, only: enthalpy_mush_liquid_fraction
   use icepack_mushy_physics, only: icepack_mushy_temperature_mush, icepack_mushy_liquid_fraction
@@ -18,7 +19,6 @@ module icepack_therm_mushy
   use icepack_mushy_physics, only: conductivity_mush_array, conductivity_snow_array
   use icepack_tracers, only: tr_pond
   use icepack_therm_shared, only: surface_heat_flux, dsurface_heat_flux_dTsf
-  use icepack_therm_shared, only: ferrmax
   use icepack_warnings, only: warnstr, icepack_warnings_add
   use icepack_warnings, only: icepack_warnings_setabort, icepack_warnings_aborted
 

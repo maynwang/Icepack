@@ -118,6 +118,8 @@
          hs_min    = 1.e-4_dbl_kind   ,&! min snow thickness for computing zTsn (m)
          snowpatch = 0.02_dbl_kind    ,&! parameter for fractional snow area (m)
          saltmax   = 3.2_dbl_kind     ,&! max salinity at ice base for BL99 (ppt)
+         ferrmax   = 1.0e-2_dbl_kind  ,&! max allowed energy flux error (W m-2)
+                                        ! recommend ferrmax < 0.01 W m-2
                                         ! phi_init, dSin0_frazil are for mushy thermo
          phi_init  = 0.75_dbl_kind    ,&! initial liquid fraction of frazil
          min_salin = p1               ,&! threshold for brine pocket treatment
@@ -397,7 +399,7 @@
          iceruf_in, Cf_in, Pstar_in, Cstar_in, kappav_in, &
          kice_in, kseaice_in, ksno_in, zTrf_in, umin_in, &
          zref_in, hs_min_in, snowpatch_in, rhosi_in, sk_l_in, &
-         saltmax_in, phi_init_in, min_salin_in, salt_loss_in, &
+         saltmax_in, ferrmax_in, phi_init_in, min_salin_in, salt_loss_in, &
          min_bgc_in, dSin0_frazil_in, hi_ssl_in, hs_ssl_in, &
          awtvdr_in, awtidr_in, awtvdf_in, awtidf_in, &
          qqqice_in, TTTice_in, qqqocn_in, TTTocn_in, &
@@ -470,6 +472,7 @@
          hs_min_in,     & ! min snow thickness for computing zTsn (m)
          snowpatch_in,  & ! parameter for fractional snow area (m)
          saltmax_in,    & ! max salinity at ice base for BL99 (ppt)
+         ferrmax_in,    & ! max allowed energy flux error (W m-2)
          phi_init_in,   & ! initial liquid fraction of frazil
          min_salin_in,  & ! threshold for brine pocket treatment
          salt_loss_in,  & ! fraction of salt retained in zsalinity
@@ -775,6 +778,7 @@
       if (present(rhosi_in)             ) rhosi            = rhosi_in
       if (present(sk_l_in)              ) sk_l             = sk_l_in
       if (present(saltmax_in)           ) saltmax          = saltmax_in
+      if (present(ferrmax_in)           ) ferrmax          = ferrmax_in
       if (present(phi_init_in)          ) phi_init         = phi_init_in
       if (present(min_salin_in)         ) min_salin        = min_salin_in
       if (present(salt_loss_in)         ) salt_loss        = salt_loss_in
@@ -911,7 +915,7 @@
          iceruf_out, Cf_out, Pstar_out, Cstar_out, kappav_out, &
          kice_out, kseaice_out, ksno_out, zTrf_out, umin_out, &
          zref_out, hs_min_out, snowpatch_out, rhosi_out, sk_l_out, &
-         saltmax_out, phi_init_out, min_salin_out, salt_loss_out, &
+         saltmax_out, ferrmax_out, phi_init_out, min_salin_out, salt_loss_out, &
          min_bgc_out, dSin0_frazil_out, hi_ssl_out, hs_ssl_out, &
          awtvdr_out, awtidr_out, awtvdf_out, awtidf_out, &
          qqqice_out, TTTice_out, qqqocn_out, TTTocn_out, update_ocn_f_out, &
@@ -993,6 +997,7 @@
          hs_min_out,     & ! min snow thickness for computing zTsn (m)
          snowpatch_out,  & ! parameter for fractional snow area (m)
          saltmax_out,    & ! max salinity at ice base for BL99 (ppt)
+         ferrmax_out,    & ! max allowed energy flux error (W m-2)
          phi_init_out,   & ! initial liquid fraction of frazil
          min_salin_out,  & ! threshold for brine pocket treatment
          salt_loss_out,  & ! fraction of salt retained in zsalinity
@@ -1339,6 +1344,7 @@
       if (present(rhosi_out)             ) rhosi_out        = rhosi
       if (present(sk_l_out)              ) sk_l_out         = sk_l
       if (present(saltmax_out)           ) saltmax_out      = saltmax
+      if (present(ferrmax_out)           ) ferrmax_out      = ferrmax
       if (present(phi_init_out)          ) phi_init_out     = phi_init
       if (present(min_salin_out)         ) min_salin_out    = min_salin
       if (present(salt_loss_out)         ) salt_loss_out    = salt_loss
@@ -1517,6 +1523,7 @@
         write(iounit,*) "  rhosi  = ",rhosi
         write(iounit,*) "  sk_l   = ",sk_l
         write(iounit,*) "  saltmax   = ",saltmax
+        write(iounit,*) "  ferrmax   = ",ferrmax
         write(iounit,*) "  phi_init  = ",phi_init
         write(iounit,*) "  min_salin = ",min_salin
         write(iounit,*) "  salt_loss = ",salt_loss

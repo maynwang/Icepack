@@ -27,12 +27,13 @@
       use icepack_parameters, only: ustar_min, fbot_xfer_type, formdrag, calc_strair
       use icepack_parameters, only: rfracmin, rfracmax, pndaspect, dpscale, frzpnd
       use icepack_parameters, only: phi_i_mushy, floeshape, floediam
+      use icepack_parameters, only: ferrmax
 
       use icepack_tracers, only: tr_iage, tr_FY, tr_aero, tr_pond, tr_fsd, tr_iso
       use icepack_tracers, only: tr_pond_cesm, tr_pond_lvl, tr_pond_topo
       use icepack_tracers, only: n_aero, n_iso
 
-      use icepack_therm_shared, only: ferrmax, l_brine
+      use icepack_therm_shared, only: l_brine
       use icepack_therm_shared, only: calculate_tin_from_qin, Tmin
       use icepack_therm_shared, only: hi_min
       use icepack_therm_bl99,   only: temperature_changes
