@@ -66,13 +66,13 @@
       use icedrv_flux, only: frain, fiso_evap, fiso_ocn, fiso_atm
       use icedrv_flux, only: Tair, Qa, fsw, fcondtop
       use icedrv_flux, only: fbot, fcondbot
-      use icedrv_flux, only: meltt, meltb, meltl, snoice, phin
+      use icedrv_flux, only: meltt, meltb, meltl, snoice, phin, w_diag, dSdt_diag
       use icedrv_flux, only: dh0_cumul, da0_cumul  
       use icedrv_flux, only: meltt_cumul, meltb_cumul, melts_cumul, congel_cumul
       use icedrv_flux, only: snoice_cumul, frazil_cumul, meltl_cumul
       use icedrv_flux, only: melttn_cumul, meltbn_cumul, meltsn_cumul, congeln_cumul
       use icedrv_flux, only: dsnown_cumul, snoicen_cumul, meltln_cumul 
-      use icedrv_flux, only: dsnow, congel, sst, sss, Tf, fhocn
+      use icedrv_flux, only: dsnow, congel, sst, sss, Tf, fhocn, Tref
       use icedrv_state, only: aice, vice, vsno, trcr, trcrn, aicen
       use icedrv_state, only: vicen, vsnon
       use icedrv_state, only: g0n, g1n, hLn, hRn
@@ -134,8 +134,9 @@
 
       call total_energy (work1)
       call total_salt   (work2)
-
+      
       do n = 1, nx
+        !call print_state('Printing state',n)
         pTair = Tair(n) - Tffresh ! air temperature
         pfsnow = fsnow(n)*dt/rhos ! snowfall
         pfrain = frain(n)*dt/rhow ! rainfall
@@ -162,6 +163,7 @@
 
         endif
         if (vice(n) /= c0) psalt = work2(n)/vice(n)
+        pTair = Tref(n)- Tffresh 
         pTsfc = trcr(n,nt_Tsfc)   ! ice/snow sfc temperature
         pevap = evap(n)*dt/rhoi   ! sublimation/condensation
         pdhi(n) = vice(n) - pdhi(n)  ! ice thickness change
@@ -217,7 +219,7 @@
 
        
         if (calc_Tsfc) then
-          write(nu_diag_out+n-1,900) 'surface temperature(C) = ',pTsfc ! ice/snow
+          write(nu_diag_out+n-1,900) 'surface temperature(C) = ',pTsfc ! ice/snow !pTsfc
           write(nu_diag_out+n-1,900) 'absorbed shortwave flx = ',fswabs(n)
           write(nu_diag_out+n-1,900) 'outward longwave flx   = ',flwout(n)
           write(nu_diag_out+n-1,900) 'sensible heat flx      = ',fsens(n)
@@ -281,7 +283,8 @@
           write(nu_diag_out+n-1,900) 'cat. bottommelt (m)       = ',meltbn_cumul(n,k)
           write(nu_diag_out+n-1,900) 'cat. lateralmelt (m)      = ',meltln_cumul(n,k)
           write(nu_diag_out+n-1,900) 'cat. congel (m)           = ',congeln_cumul(n,k)
-          write(nu_diag_out+n-1,900) 'cat. snowice (m)          = ',snoicen_cumul(n,k)
+          write(nu_diag_out+n-1,900) 'cat. snowice (m)          = ',snoicen_cumul(n,k) 
+          write(nu_diag_out+n-1,900) 'cat. darcy vel. (m)       = ',w_diag(n,k) ! Darcy velocity in the ice
           write(nu_diag_out+n-1,900) 'alb. ice (m)              = ',albicen(n,k)
           write(nu_diag_out+n-1,900) 'alb. sno (m)              = ',albsnon(n,k)
           write(nu_diag_out+n-1,900) 'alb. pnd (m)              = ',albpndn(n,k)
@@ -291,6 +294,7 @@
           write(nu_diag_out+n-1,900) 'hR itd right limit        = ',hRn(n,k)     ! ITD category right boundary
           do nil = 1, nilyr
             write(nu_diag_out+n-1,900) 'liquid fraction           = ', phin(n,nil,k)  ! liquid fraction
+            write(nu_diag_out+n-1,900) 'salinity changes          = ', dSdt_diag(n,nil,k)*3.6d3*2.4d1  ! dSdt due to brine physics, PSU per day
             perm = permeability(phin(n,nil,k))
             write(nu_diag_out+n-1,900) 'layer permeability        = ', perm  ! ice layer permeability 
           enddo

@@ -305,7 +305,7 @@
          rd = rdn / (c1+rdn/vonkar*(alzm-psimh))
          rh = rhn / (c1+rhn/vonkar*(alzs-psixh))
          re = ren / (c1+ren/vonkar*(alzs-psixh))
-      
+
          ! update ustar, tstar, qstar using updated, shifted coeffs
          ustar = rd * vmag
          tstar = rh * delt
@@ -413,6 +413,9 @@
          return
        endif
       endif
+      
+      !print *, "Printing hols and Tref: ", hols,potT, Tref, delt,fac, zTrf, zlvl
+      !stop
 
       end subroutine atmo_boundary_layer
 
@@ -988,6 +991,7 @@
                                    uvel=l_uvel, vvel=l_vvel,  &
                                    Uref=l_Uref, zlvs=zlvs,  &
                                    ilmo=ilmo)
+
          if (icepack_warnings_aborted(subname)) return
       endif ! atmbndy
 

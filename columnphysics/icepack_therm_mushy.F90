@@ -57,7 +57,8 @@ contains
                                           fsensn,   flatn,    &
                                           flwoutn,  fsurfn,   &
                                           fcondtop, fcondbot, &
-                                          fadvheat, snoice)
+                                          fadvheat, snoice, &
+                                          w, dSdt)
 
     ! solve the enthalpy and bulk salinity of the ice for a single column
 
@@ -83,6 +84,7 @@ contains
          fswint          ! SW absorbed in ice interior below surface (W m-2)
     
     real (kind=dbl_kind), intent(inout) :: &
+         w           , & ! vertical flushing Darcy velocity (m/s)
          hilyr       , & ! ice layer thickness (m)
          hslyr       , & ! snow layer thickness (m)
          apond       , & ! melt pond area fraction
@@ -104,11 +106,13 @@ contains
          fadvheat    , & ! flow of heat to ocean due to advection (W m-2)
          snoice          ! snow ice formation
 
+
     real (kind=dbl_kind), dimension(1:nilyr), intent(out) :: &
-         phi             ! liquid fraction
+         phi         , & ! liquid fraction
+         dSdt            ! gravity drainage desalination rate for slow mode (ppt s-1)
 
     real (kind=dbl_kind), intent(inout):: &
-         Tsf             ! ice/snow surface temperature (C)
+         Tsf      ! ice/snow surface temperature (C)
 
     real (kind=dbl_kind), dimension (:), intent(inout) :: &
          zqin        , & ! ice layer enthalpy (J m-3)
@@ -121,8 +125,7 @@ contains
     real(kind=dbl_kind), dimension(1:nilyr) :: &
          zqin0       , & ! ice layer enthalpy (J m-3) at start of timestep
          zSin0       , & ! internal ice layer salinities (ppt) at start of timestep
-         km          , & ! ice conductivity (W m-1 K-1)
-         dSdt            ! gravity drainage desalination rate for slow mode (ppt s-1)
+         km           ! ice conductivity (W m-1 K-1)
 
     real(kind=dbl_kind), dimension(1:nilyr+1) :: &
          Sbr         , & ! brine salinity (ppt)
@@ -140,7 +143,6 @@ contains
          hin         , & ! ice thickness (m)
          hsn         , & ! snow thickness (m)
          hslyr_min   , & ! minimum snow layer thickness (m)
-         w           , & ! vertical flushing Darcy velocity (m/s)
          qocn        , & ! ocean brine enthalpy (J m-3)
          qpond       , & ! melt pond brine enthalpy (J m-3)
          Spond           ! melt pond salinity (ppt)
@@ -201,6 +203,7 @@ contains
                                   qbr,    dt,     &
                                   sss,    qocn,   &
                                   hilyr,  hin)
+
     if (icepack_warnings_aborted(subname)) return
     
     ! calculate the conductivities
