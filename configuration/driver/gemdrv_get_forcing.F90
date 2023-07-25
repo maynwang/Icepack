@@ -37,19 +37,19 @@ module gemdrv_get_forcing
            character*512 GEM_rpn_list
           
       call alloc_col_forcing(npt)
-	DO kt = 1, npt
+	  DO kt = 1, npt
 
           call load_data( kt,GEM_rpn_list )
-	  call prepare_cice_sfc(kt)
+	      call prepare_cice_sfc(kt)
 
-	IF (kt .eq. 1) then 
-	   call get_col_position(lat_col,lon_col,i_col,j_col)
-	   print *, lat_col,lon_col,i_col,j_col
-	ENDIF
+	      IF (kt .eq. 1) then 
+	          call get_col_position(lat_col,lon_col,i_col,j_col)
+	          print *, lat_col,lon_col,i_col,j_col
+	      ENDIF
 
-	  call prep_col_forcing(i_col,j_col,kt)
+	      call prep_col_forcing(i_col,j_col,kt)
 	  
-	ENDDO
+	  ENDDO
 	
       END SUBROUTINE prepare_gem_forcing	
 

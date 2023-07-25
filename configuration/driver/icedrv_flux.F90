@@ -89,6 +89,7 @@
 
       real (kind=dbl_kind), dimension (nx), public :: &
          zlvl    , & ! atm level height (m)
+         zlvs    , & ! atm level height for scalars (if different than zlvl) (m)
          uatm    , & ! wind velocity components (m/s)
          vatm    , &
          wind    , & ! wind speed (m/s)
@@ -201,11 +202,13 @@
          melttn      , & ! top melt in category n (m)
          meltln      , & ! lateral melt in category n (m)
          meltbn      , & ! bottom melt in category n (m)
+         w_diag      , & ! vertical velocity diagnostics
          congeln     , & ! congelation ice formation in category n (m)
          snoicen         ! snow-ice formation in category n (m)
 
       real (kind=dbl_kind), dimension (nx,nilyr,ncat), public :: &    
-         phin            ! liquid fraction in ice layers, in category n
+         phin        , &   ! liquid fraction in ice layers, in category n
+         dSdt_diag         ! Change in salinity due to brine physics
 
       real (kind=dbl_kind), dimension (nx,ncat), public :: &
          keffn_top    , & ! effective thermal conductivity of the top ice layer 
@@ -261,7 +264,7 @@
          meltt_cumul,  & ! cumulative top ice melt             (m)
          melts_cumul,  & ! cumulative snow melt                (m)
          meltb_cumul,  & ! cumulative basal ice melt           (m)
-         meltl_cumul,  & ! cumulative lateral melt 	        (m)
+         meltl_cumul,  & ! cumulative lateral melt             (m)
          dsnow,  & ! change in snow thickness (m/step-->cm/day)
          daidtt, & ! ice area tendency thermo.   (s^-1)
          dvidtt, & ! ice volume tendency thermo. (m/s)
@@ -441,6 +444,7 @@
       ! fluxes received from atmosphere
       !-----------------------------------------------------------------
       zlvl  (:) = c10                ! atm level height (m)
+      zlvs  (:) = c10                ! atm level height for scalars (if different than zlvl) (m)
       rhoa  (:) = 1.3_dbl_kind       ! air density (kg/m^3)
       uatm  (:) = c5                 ! wind velocity    (m/s)
       vatm  (:) = c5
@@ -513,7 +517,7 @@
       uocn   (:) = c0              ! surface ocean currents (m/s)
       vocn   (:) = c0
       frzmlt (:) = c0              ! freezing/melting potential (W/m^2)
-      sss    (:) = 34.0_dbl_kind   ! sea surface salinity (ppt)
+      sss    (:) = 33.0_dbl_kind   ! sea surface salinity (ppt)
       sst    (:) = -1.8_dbl_kind   ! sea surface temperature (C)
       sstdat (:) = sst(:)          ! sea surface temperature (C)
 
@@ -524,12 +528,16 @@
 
       do i = 1, nx
          Tf (i) = icepack_liquidus_temperature(sss(i)) ! freezing temp (C)
+         ! Landfast ice experiment, set sst to Tf:
+         sst(i) = icepack_liquidus_temperature(sss(i))
       enddo
+      
       call icepack_warnings_flush(nu_diag)
       if (icepack_warnings_aborted()) call icedrv_system_abort(string=subname, &
           file=__FILE__,line= __LINE__)
 
       qdp     (:) = c0             ! deep ocean heat flux (W/m^2)
+      !qdp     (:) = -6.0 
       hmix    (:) = c20            ! ocean mixed layer depth
 
       !-----------------------------------------------------------------

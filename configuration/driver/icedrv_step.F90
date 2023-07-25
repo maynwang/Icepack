@@ -113,7 +113,7 @@
       use icedrv_flux, only: frzmlt, sst, Tf, strocnxT, strocnyT, rside, fside, &
                              fbot, Tbot, Tsnice
       use icedrv_flux, only: meltsn, melttn, meltbn, congeln, snoicen, uatm, vatm, phin
-      use icedrv_flux, only: wind, rhoa, potT, Qa, Qa_iso, zlvl, strax, stray, flatn
+      use icedrv_flux, only: wind, rhoa, potT, Qa, Qa_iso, zlvl, zlvs, strax, stray, flatn
       use icedrv_flux, only: fsensn, fsurfn, fcondtopn, fcondbotn
       use icedrv_flux, only: flw, fsnow, fpond, sss, mlt_onset, frz_onset
       use icedrv_flux, only: frain, Tair, strairxT, strairyT, fsurf
@@ -129,6 +129,7 @@
       use icedrv_flux, only: dsnown, faero_atm, faero_ocn
       use icedrv_flux, only: fiso_atm, fiso_ocn, fiso_evap
       use icedrv_flux, only: HDO_ocn, H2_16O_ocn, H2_18O_ocn
+      use icedrv_flux, only: w_diag, dSdt_diag
       use icedrv_init, only: lmask_n, lmask_s
       use icedrv_state, only: aice, aicen, aice_init, aicen_init, vicen_init
       use icedrv_state, only: vice, vicen, vsno, vsnon, trcrn, uvel, vvel, vsnon_init
@@ -352,7 +353,9 @@
             dsnown   = dsnown(i,:),   phin      = phin(i,1:nilyr,:),&
             lmask_n  = lmask_n(i),    lmask_s   = lmask_s(i),     &
             mlt_onset=mlt_onset(i),   frz_onset = frz_onset(i),   &
-            yday = yday,  prescribed_ice = prescribed_ice)
+            yday = yday,         prescribed_ice = prescribed_ice, &
+            zlvs = zlvs(i),           w_diag    = w_diag(i,:),    &
+            dSdt_diag = dSdt_diag(i,1:nilyr,:))
 
         if (tr_aero) then
           do n = 1, ncat
@@ -395,7 +398,7 @@
       snoicen_cumul = snoicen_cumul + snoicen*aicen
       dsnown_cumul = dsnown_cumul + dsnown*aicen       
       
-      
+
       call icepack_warnings_flush(nu_diag)
       if (icepack_warnings_aborted()) call icedrv_system_abort(string=subname, &
           file=__FILE__, line=__LINE__)
@@ -1029,7 +1032,7 @@
       use icepack_intfc, only: icepack_ocn_mixed_layer, icepack_atm_boundary
       use icedrv_init, only: tmask
       use icedrv_domain_size, only: nx
-      use icedrv_flux, only: sst, Tf, Qa, uatm, vatm, wind, potT, rhoa, zlvl
+      use icedrv_flux, only: sst, Tf, Qa, uatm, vatm, wind, potT, rhoa, zlvl,zlvs
       use icedrv_flux, only: frzmlt, fhocn, fswthru, flw, flwout_ocn, fsens_ocn, flat_ocn, evap_ocn
       use icedrv_flux, only: alvdr_ocn, alidr_ocn, alvdf_ocn, alidf_ocn, swidf, swvdf, swidr, swvdr
       use icedrv_flux, only: qdp, hmix, strairx_ocn, strairy_ocn, Tref_ocn, Qref_ocn
@@ -1103,7 +1106,8 @@
                                             lhcoef  = lhcoef(i),      &
                                             shcoef  = shcoef(i),      &
                                             Cdn_atm = Cdn_atm(i),     & 
-                                            Cdn_atm_ratio_n = Cdn_atm_ratio(i))    
+                                            Cdn_atm_ratio_n = Cdn_atm_ratio(i),&
+                                            zlvs    = zlvs(i))    
                endif
             enddo ! i
             call icepack_warnings_flush(nu_diag)

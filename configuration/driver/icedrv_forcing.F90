@@ -18,7 +18,7 @@
       use icepack_intfc, only: icepack_sea_freezing_temperature 
       use icepack_intfc, only: icepack_init_wave
       use icedrv_system, only: icedrv_system_abort
-      use icedrv_flux, only: zlvl, Tair, potT, rhoa, uatm, vatm, wind, &
+      use icedrv_flux, only: zlvl, zlvs, Tair, potT, rhoa, uatm, vatm, wind, &
          strax, stray, fsw, swvdr, swvdf, swidr, swidf, Qa, flw, frain, &
          fsnow, sst, sss, uocn, vocn, qdp, hmix, Tf, opening, closing, sstdat
       use icedrv_init_SIMBA, only: lat_buoy, lon_buoy
@@ -63,6 +63,7 @@
           swidr_data, &
           swidf_data, &
            zlvl_data, &
+           zlvs_data, &
            hmix_data
 
       real (kind=dbl_kind), dimension(nx) :: &
@@ -126,6 +127,7 @@
       i = 1 ! use first grid box value
 
           zlvl_data(:) = zlvl (i)    ! atmospheric data level (m)
+          zlvs_data(:) = zlvs (i)    ! atm level height for scalars (if different than zlvl) (m)
           Tair_data(:) = Tair (i)    ! air temperature  (K)
           potT_data(:) = potT (i)    ! air potential temperature  (K)
           rhoa_data(:) = rhoa (i)    ! air density (kg/m^3)
@@ -176,7 +178,8 @@
                             Qa_data,       rhoa_data,     &
                             uatm_data,     vatm_data,     &
                             strax_data,    stray_data,    &
-                            zlvl_data,     wind_data,     &
+                            zlvl_data,     zlvs_data,    &
+                            wind_data,     &
                             swvdr_data,    swvdf_data,    &
                             swidr_data,    swidf_data,    &
                             potT_data)
@@ -380,14 +383,18 @@
          swidf(:) = c1intp * swidf_data(mlast) + c2intp * swidf_data(mnext)
 
       elseif (trim(atm_data_type) == 'GEM') then
-	print *, 'getting the forcing for the time step i : ', timestep
-
-	 i = mod(timestep-1,ntime)+1 ! repeat forcing cycle
-         mlast = i
-         mnext = mlast
-         c1intp = c1
-         c2intp = c0
-	
+         i = timestep !mod(timestep-1,ntime)+1 ! repeat forcing cycle
+	     if (dt .lt. 3600) then
+	         mlast = i*dt/3600
+	         mnext = mlast + 1
+	         c2intp = (i*dt/3600.0 - mlast)/(mnext - mlast)
+	         c1intp = c1 - c2intp
+	     else
+             mlast = i
+             mnext = mlast
+             c1intp = c1
+             c2intp = c0
+         endif
          Tair (:) = c1intp *  Tair_data(mlast) + c2intp *  Tair_data(mnext)
          Qa   (:) = c1intp *    Qa_data(mlast) + c2intp *    Qa_data(mnext)
          uatm (:) = c1intp *  uatm_data(mlast) + c2intp *  uatm_data(mnext)
@@ -395,6 +402,9 @@
          fsnow(:) = c1intp * fsnow_data(mlast) + c2intp * fsnow_data(mnext)
          flw  (:) = c1intp *   flw_data(mlast) + c2intp *   flw_data(mnext)
          fsw  (:) = c1intp *   fsw_data(mlast) + c2intp *   fsw_data(mnext)
+         
+         zlvl (:) = c1intp *   zlvl_data(mlast) + c2intp *   zlvl_data(mnext)
+         zlvs (:)  = c1intp *   zlvs_data(mlast) + c2intp *   zlvs_data(mnext)
 
          ! derived (or not otherwise set)
          potT (:) = c1intp *  potT_data(mlast) + c2intp *  potT_data(mnext)
@@ -407,7 +417,7 @@
          swvdf(:) = c1intp * swvdf_data(mlast) + c2intp * swvdf_data(mnext)
          swidr(:) = c1intp * swidr_data(mlast) + c2intp * swidr_data(mnext)
          swidf(:) = c1intp * swidf_data(mlast) + c2intp * swidf_data(mnext)
-
+         
       endif
 
 ! possible bug:  is the ocean data also offset to the beginning of the field campaigns?
@@ -484,6 +494,7 @@
         closing(:) = -(c1intp * clos_data(mlast) + c2intp * clos_data(mnext))
 
       endif
+
 
       end subroutine get_forcing
 
@@ -616,7 +627,8 @@
                                   Qa,       rhoa,     &
                                   uatm,     vatm,     &
                                   strax,    stray,    &
-                                  zlvl,     wind,     &
+                                  zlvl,     zlvs,     &
+                                  wind,     &
                                   swvdr,    swvdf,    &
                                   swidr,    swidf,    &
                                   potT)
@@ -637,6 +649,7 @@
          strax   , & ! wind stress components (N/m^2)
          stray   , &
          zlvl    , & ! atm level height (m)
+         zlvs    , & ! atm level height for scalars (if different than zlvl) (m)
          wind    , & ! wind speed (m/s)
 !        flw     , & ! incoming longwave radiation (W/m^2)
          swvdr   , & ! sw down, visible, direct  (W/m^2)
@@ -729,8 +742,9 @@
       ! Compute other fields needed by model
       !-----------------------------------------------------------------
 
-         zlvl(nt) = zlvl0
-         potT(nt) = Tair(nt)
+         !zlvl(nt) = zlvl0
+         !zlvs(nt) = zlvl0
+         !potT(nt) = Tair(nt)
 
          ! divide shortwave into spectral bands
          swvdr(nt) = fsw(nt)*frcvdr        ! visible direct
@@ -1007,7 +1021,7 @@
 
       ! there is data for 366 days, but we only use 365
 
-      integer (kind=int_kind) ::  i !, nptgem        ! index
+      integer (kind=int_kind) ::  i , nptgem        ! index
       character*512 GEM_rpn_list
       character*512 GEM_data_file
       
@@ -1015,20 +1029,27 @@
       !It is used by fnom to load the forcing data.
       GEM_data_file = 'GEM_atm_forcing.txt'   
       GEM_rpn_list = trim(data_dir)//'/GEM/'//trim(GEM_data_file) 
+      print *, npt, idate0, dt
+      if (dt .lt. 3600) then
+          nptgem = npt*dt/3600
+      else
+          nptgem = npt    
+      endif
+      print *, nptgem
       
-      call prepare_gem_forcing(idate0,npt,lat_buoy,lon_buoy,GEM_rpn_list)
-
+      call prepare_gem_forcing(idate0,nptgem,lat_buoy,lon_buoy,GEM_rpn_list)
       
-      do i = 1, npt
+      do i = 1, nptgem
          Tair_data (i) = Tair_col (i)
          Qa_data   (i) = Qa_col   (i)
          uatm_data (i) = uatm_col (i)
          vatm_data (i) = vatm_col (i)
          fsnow_data(i) = fsnow_col(i)
-          zlvl_data(i) = zlvl_col (i)    ! atmospheric data level (m)
-          potT_data(i) = potT_col (i)    ! air potential temperature  (K)
-          rhoa_data(i) = rhoa_col (i)    ! air density (kg/m^3)  
-          wind_data(i) = wind_col (i)    ! wind speed (m/s)
+         zlvl_data(i) = zlvl_col (i)    ! atmospheric data level (m)
+         zlvs_data(i) = zlvt_col (i)    ! atm level height for scalars (if different than zlvl) (m)
+         potT_data(i) = potT_col (i)    ! air potential temperature  (K)
+         rhoa_data(i) = rhoa_col (i)    ! air density (kg/m^3)  
+         wind_data(i) = wind_col (i)    ! wind speed (m/s)
          strax_data(i) = c0    ! wind stress components (N/m^2)
          stray_data(i) = c0   
          fsw_data(i) = fsw_col  (i)    ! incoming shortwave radiation (W/m^2)
@@ -1038,6 +1059,7 @@
          swidf_data(i) = swidf_col(i)    ! sw down, near IR, diffuse (W/m^2)
            flw_data(i) = flw_col  (i)    ! incoming longwave radiation (W/m^2)
          frain_data(i) = frain_col(i)    ! rainfall rate (kg/m^2 s)
+         
       enddo 
 
       

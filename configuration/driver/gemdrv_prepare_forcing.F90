@@ -126,7 +126,8 @@ CONTAINS
          rhoa_rpn(:,:) = 101000. / ( 287.04 * MAX(1.0,tatm_ice(:,:)) ) ! Constant (101000.) atm pressure assumed
                                                      
          Qa_rpn(:,:) = qatm_ice(:,:)        
-         zlvl_rpn(:,:)=10.0
+         zlvl_rpn(:,:)=zlm_i_rpn(:,:)      
+         zlvt_rpn(:,:)=zlt_i_rpn(:,:) 
         
 ! Divide shortwave into spectral bands (as in prepare_forcing)
          swvdr_rpn(:,:)=qsr_ice(:,:,1)*frcvdr       ! visible direct        
@@ -151,14 +152,15 @@ CONTAINS
 !      print *, 'sample potT : ', potT_rpn(50,50)
 !      print *, 'sample rhoa : ', rhoa_rpn(50,50)
 !      print *, 'sample Qa : ', Qa_rpn(50,50)
-!      print *, 'sample zlvl : ', zlvl_rpn(50,50)
+      print *, 'sample zlvl : ', zlvl_rpn(50,50)
+      print *, 'sample zlvs : ', zlvt_rpn(50,50)
 !      print *, 'sample swvdr : ', swvdr_rpn(50,50)
 !      print *, 'sample swvdf : ', swvdf_rpn(50,50)
 !      print *, 'sample swidr : ', swidr_rpn(50,50)
 !      print *, 'sample swidf : ', swidf_rpn(50,50)
 !      print *, 'sample fsnow : ', fsnow_rpn(50,50)      
 !      print *, 'sample frain : ', frain_rpn(50,50)
-                
+                      
       return
    END SUBROUTINE prepare_cice_sfc
    
@@ -212,6 +214,7 @@ CONTAINS
          rhoa_col(kt) = rhoa_rpn(i_col,j_col)
          Qa_col(kt) = Qa_rpn(i_col,j_col) 
          zlvl_col(kt) = zlvl_rpn(i_col,j_col)
+         zlvt_col(kt) = zlvt_rpn(i_col,j_col)
          potT_col(kt) = potT_rpn(i_col,j_col) ! Potential temp (K)
          swvdr_col(kt) = swvdr_rpn(i_col,j_col)      ! visible direct
          swvdf_col(kt) = swvdf_rpn(i_col,j_col)     ! visible diffuse
@@ -229,7 +232,8 @@ CONTAINS
 !        print *, 'sample Tair : ', Tair_col(kt)
 !        print *, 'sample rhoa : ', rhoa_col(kt)
 !        print *, 'sample Qa : ', Qa_col(kt)
-!        print *, 'sample zlvl : ', zlvl_col(kt)
+        print *, 'sample zlvl : ', zlvl_col(kt)
+        print *, 'sample zlvs : ', zlvt_col(kt)
 !        print *, 'sample potT : ', potT_col(kt)
 !        print *, 'sample swvdr : ', swvdr_col(kt)
 !        print *, 'sample swvdf : ', swvdf_col(kt)

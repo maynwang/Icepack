@@ -142,11 +142,12 @@ CONTAINS
         print *, 'Going into atmopenf, with ksbc : ', kt_sbc
 
       call atm_openf(GEM_rpn_list)
-      dayfrac = dble(kt_sbc)*dt*rsid ! current timestep into seconds from sim start      
+      dayfrac = dble(kt_sbc)*max(dt,3600.0)*rsid ! current timestep into seconds from sim start      
       call incdatsd  (datev,Mod_runstrt_S,dayfrac) !getting the date of current time
       call prsdate   (yy,mo,dd,hh,mm,ss,dum,datev,1) !from date string to yy,mm,etc
       call pdfjdate2 (tforc_2,yy,mo,dd,hh,mm,ss) ! get current time (sec) into tforc_2
-       print *, 'Going into (initial) atm_get_data, datev : ', datev
+      print *, 'Going into (initial) atm_get_data, datev, dayfrac : ', datev, dayfrac, dt
+      
       call atm_getdata (datev,.false.,.true.,sd) ! get the date for current time (datev)
        print *, 'end atm_getdata initial'
       return
@@ -231,7 +232,7 @@ CONTAINS
       real(wp) ::  b
       parameter(one=1.0d0, sid=86400.0d0, rsid=one/sid)
           
-      dayfrac = dble(kt_sbc)*dt*rsid 
+      dayfrac = dble(kt_sbc)*max(dt,3600.0)*rsid 
       call incdatsd  (datev,Mod_runstrt_S,dayfrac)
       print *, 'datev, Mod_runstrt_S, dayfrac :', datev, Mod_runstrt_S, dayfrac
       if (datev.gt.current_atmf) then
@@ -284,19 +285,19 @@ CONTAINS
       logical put,get
       TYPE(FLD), INTENT(inout), DIMENSION(:) ::   sd
       integer yy,mo,dd,hh,mm,ss,datm,dum,jf
-      print *, 'switching tforc : ', tforc_1, tforc_2
+      !print *, 'switching tforc : ', tforc_1, tforc_2
       tforc_1        = tforc_2
-      print *, 'switching tforc : ', tforc_1, tforc_2
-      print *, 'switching data T sample: ', sd(6)%fdta(50,50,1,1), sd(6)%fdta(50,50,1,2)   
+      !print *, 'switching tforc : ', tforc_1, tforc_2
+      !print *, 'switching data T sample: ', sd(6)%fdta(50,50,1,1), sd(6)%fdta(50,50,1,2)   
       DO jf = 1, SIZE( sd )     
         sd(jf)%fdta(:,:,1,1) = sd(jf)%fdta(:,:,1,2)
       ENDDO
-     print *, 'Going into atm_read'
+      !print *, 'Going into atm_read'
       call atm_read_rpn (datev,sd)
       current_atmf = datev
       call prsdate   (yy,mo,dd,hh,mm,ss,dum,datev,1)
       call pdfjdate2 (tforc_2,yy,mo,dd,hh,mm,ss)
-      print *, 'switching data T sample: ', sd(6)%fdta(50,50,1,1), sd(6)%fdta(50,50,1,2)
+      !print *, 'switching data T sample: ', sd(6)%fdta(50,50,1,1), sd(6)%fdta(50,50,1,2)
       return
       END SUBROUTINE atm_getdata
 

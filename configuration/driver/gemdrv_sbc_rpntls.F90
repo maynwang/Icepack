@@ -288,7 +288,7 @@ CONTAINS
 !
       ip2 =(stepno*dt)/3600
       rl_work=REAL(rs,sp)   ! conversion to single precision 
-      call fstecr (rl_work,rl_work,-32,id_unit, date0, NINT(dt), stepno, nx,ny,1, &
+      call fstecr (rl_work,rl_work,-32,id_unit, date0, NINT(max(dt,3600.0)), stepno, nx,ny,1, &
                 &  0,ip2,0,'P',varname,'rslt2','X',1,1,1,1,1,.false.)
 
       call fstfrm (id_unit)
@@ -314,7 +314,7 @@ CONTAINS
       err = fnom (id_unit, out_file, 'rnd', 0)
       call fstouv (id_unit,'rnd')
 !
-      ip2 =(stepno*dt)/3600
+      ip2 =(stepno*3600.0)/3600
       call fstecr (rs,rs,-32,id_unit, date0, NINT(dt), stepno, nx,ny,1, &
                 &  0,ip2,0,'P',varname,'rslt2','X',1,1,1,1,1,.false.)
 
@@ -363,7 +363,7 @@ CONTAINS
       err = fnom (id_unit, out_file, 'rnd', 0)
       call fstouv (id_unit,'rnd')
 !
-      ip2 =(stepno*dt)/3600
+      ip2 =(stepno*3600.0)/3600
       call fstecr (wrs,wrs,-32,id_unit, date0, NINT(dt), stepno, nx,ny,1, &
                 &  0,ip2,0,'P@',varname,'rslt2','X',1,1,1,1,1,.false.)
       call fstecr (wms,wms,-1,id_unit, date0, NINT(dt), stepno, nx,ny,1, &
