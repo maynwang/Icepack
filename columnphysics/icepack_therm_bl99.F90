@@ -19,10 +19,11 @@
       use icepack_parameters, only: rhoi, rhos, hs_min, cp_ice, cp_ocn, depressT, Lfresh, ksno, kice
       use icepack_parameters, only: conduct, calc_Tsfc, solve_zsal
       use icepack_parameters, only: sw_redist, sw_frac, sw_dtemp
+      use icepack_parameters, only: ferrmax
       use icepack_warnings, only: warnstr, icepack_warnings_add
       use icepack_warnings, only: icepack_warnings_setabort, icepack_warnings_aborted
 
-      use icepack_therm_shared, only: ferrmax, l_brine
+      use icepack_therm_shared, only: l_brine
       use icepack_therm_shared, only: surface_heat_flux, dsurface_heat_flux_dTsf
 
       implicit none

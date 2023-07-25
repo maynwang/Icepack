@@ -38,10 +38,6 @@
                 icepack_enthalpy_snow
 
       real (kind=dbl_kind), parameter, public :: &
-         ferrmax = 2.0e-3_dbl_kind    ! max allowed energy flux error (W m-2)
-                                      ! recommend ferrmax < 0.01 W m-2
-
-      real (kind=dbl_kind), parameter, public :: &
          Tmin = -100.0_dbl_kind ! min allowed internal temperature (deg C)
 
       logical (kind=log_kind), public :: &
