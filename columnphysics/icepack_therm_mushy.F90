@@ -3293,7 +3293,8 @@ contains
        !stop
        ! check if have flooded ice
        if (freeboard_density > c0) then
-          if (phi_min > 0.00d0) then 
+          !Porosity threshold for snow flooding. 0d0 if no threshold.  
+          if (phi_min > 0.005d0) then 
               ! sea ice fraction of newly formed snow ice
               phi_snowice = (c1 - rhos / rhoi)
 
@@ -3303,7 +3304,9 @@ contains
               ! calculate thickness of new ice added
               dh = freeboard_density / (rho_ocn - rho_snowice + rhos)
               dh = max(min(dh,hsn),c0)
-              !dh = min(dh,0.001d0)
+
+              !Non-instantaneous flooding rate: linear to the freeboard.
+              dh = dh*0.01d0
 
               ! enthalpy of snow that becomes snowice
               call enthalpy_snow_snowice(nslyr, dh, hsn, zqsn, zqsn_snowice)
