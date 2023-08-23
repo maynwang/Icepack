@@ -185,7 +185,6 @@
                  trcr (n,nt_qsno:nt_qsno+nslyr-1), Tinterns,    &
                  trcr (n,nt_sice:nt_sice+nilyr-1))
         
-        print *, 'Enthalpy printing: ', zqin_print
 
         !-----------------------------------------------------------------
         ! start spewing
