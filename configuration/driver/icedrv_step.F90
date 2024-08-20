@@ -170,6 +170,8 @@
 
       character(len=*), parameter :: subname='(step_therm1)'
 
+      print *, "Going through step_therm1"
+
       !-----------------------------------------------------------------
       ! query icepack values
       !-----------------------------------------------------------------
@@ -256,7 +258,7 @@
             enddo
           enddo
         endif ! tr_iso
-        
+
         call icepack_step_therm1(dt=dt, ncat=ncat, nilyr=nilyr, nslyr=nslyr, &
             aicen_init = aicen_init(i,:), &
             vicen_init = vicen_init(i,:), &
@@ -455,6 +457,8 @@
 
       character(len=*), parameter :: subname='(step_therm2)'
 
+
+
       !-----------------------------------------------------------------
       ! query icepack values
       !-----------------------------------------------------------------
@@ -518,10 +522,10 @@
                          d_afsd_latm=d_afsd_latm(i,:),                &
                          d_afsd_weld=d_afsd_weld(i,:),                &
                          floe_rad_c=floe_rad_c(:),                    &
-                         floe_binwidth=floe_binwidth(:)),             &
+                         floe_binwidth=floe_binwidth(:),              &
                          g0n = g0n(i,:),  g1n = g1n(i,:),             &
                          hLn = hLn(i,:),  hRn = hRn(i,:),             &
-                         dh0 = dh0(i),    da0 = da0(i),               &
+                         dh0_cumul = dh0(i),    da0_cumul = da0(i),               &
                          meltln = meltln(i,:) )
 
          endif ! tmask

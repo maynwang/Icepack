@@ -46,7 +46,7 @@
       use icepack_mushy_physics, only: icepack_mushy_temperature_mush, enthalpy_brine
       use icepack_mushy_physics, only: liquidus_temperature_mush
       use icepack_mushy_physics, only: enthalpy_mush, enthalpy_of_melting
-      use icepack_mushy_physics, only: enthalpy_mush_liquid_fraction, temperature_mush
+      use icepack_mushy_physics, only: enthalpy_mush_liquid_fraction
 
       use icepack_aerosol, only: update_aerosol
       use icepack_isotope, only: update_isotope
@@ -246,6 +246,10 @@
          fadvocn ! advective heat flux to ocean
 
       character(len=*),parameter :: subname='(thermo_vertical)'
+
+
+      print *, "In thermo vertical"
+
 
       !-----------------------------------------------------------------
       ! Initialize
@@ -2405,6 +2409,7 @@
 
       character(len=*),parameter :: subname='(icepack_step_therm1)'
 
+
       !-----------------------------------------------------------------
       ! allocate local optional arguments
       !-----------------------------------------------------------------
@@ -2620,7 +2625,6 @@
 
                ! Compute surface specific humidity
                Qsurn = Qa - delq
-
             endif   ! calc_Tsfc or calc_strair
 
             if (.not.(calc_strair)) then
@@ -2653,6 +2657,7 @@
       !-----------------------------------------------------------------
       ! Vertical thermodynamics: Heat conduction, growth and melting.
       !----------------------------------------------------------------- 
+
 
             if (ktherm >= 0) then
                if (.not.(calc_Tsfc)) then
@@ -2766,6 +2771,7 @@
       ! If using tr_pond_topo, the rest of the calculation is done after
       ! the surface fluxes are merged, below.
       !-----------------------------------------------------------------
+
 
          if (ktherm >= 0) then
             !call ice_timer_start(timer_ponds)
@@ -2882,7 +2888,6 @@
                                fiso_evapn=fiso_evapn)
 
          if (icepack_warnings_aborted(subname)) return
-
       enddo                  ! ncat
 
       if (present(isosno)   ) isosno   = l_isosno
@@ -2930,7 +2935,6 @@
          if (icepack_warnings_aborted(subname)) return
       endif
       !call ice_timer_stop(timer_ponds)
-
       end subroutine icepack_step_therm1
 
 !=======================================================================

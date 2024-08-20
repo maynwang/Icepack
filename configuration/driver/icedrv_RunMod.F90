@@ -52,7 +52,7 @@
           file=__FILE__,line= __LINE__)
 
       timeLoop: do
-
+         print *, "Call ice_step"
          call ice_step
 
          istep  = istep  + 1    ! update time step counters
@@ -70,7 +70,9 @@
              file=__FILE__,line= __LINE__)
 
          if (tr_fsd .and. wave_spec) call get_wave_spec ! wave spectrum in ice
+
          call get_forcing(istep1)  ! get forcing from data arrays
+
 
          ! biogeochemistry forcing
          if (tr_iso)                 call fiso_default     ! default values

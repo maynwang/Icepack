@@ -671,7 +671,7 @@
       use icepack_parameters, only: rhos, Lfresh, hs_min, cp_ice, min_salin
       use icepack_warnings, only: warnstr, icepack_warnings_add
       use icepack_warnings, only: icepack_warnings_setabort, icepack_warnings_aborted   
-      use icepack_mushy_physics, only: temperature_mush
+      use icepack_mushy_physics, only: icepack_mushy_temperature_mush
       use icepack_mushy_physics, only: liquidus_temperature_mush
       use icepack_mushy_physics, only: enthalpy_mush, enthalpy_of_melting
       use icepack_therm_shared, only: calculate_tin_from_qin, Tmin
@@ -875,7 +875,7 @@
       !-----------------------------------------------------------------
          
 	  if (ktherm == 2) then
-            zTin(k) = temperature_mush(zqin(k),zSin(k))
+            zTin(k) = icepack_mushy_temperature_mush(zqin(k),zSin(k))
 	        zqin_out(k) = zqin(k)
 	  else
             zTin(k) = calculate_Tin_from_qin(zqin(k),Tmlts(k))
@@ -913,7 +913,7 @@
             if (zTin(k) > Tmax) then               
                if (ktherm == 2) then
                   zqin_dum = enthalpy_of_melting(zSin(k)) - c1
-                  zTin(k) = temperature_mush(zqin_dum,zSin(k))
+                  zTin(k) = icepack_mushy_temperature_mush(zqin_dum,zSin(k))
                   zqin_out(k) = zqin_dum
                   write(warnstr,*) subname, 'Corrected quantities'
                else

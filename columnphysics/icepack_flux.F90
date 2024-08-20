@@ -87,7 +87,6 @@
           Trefn   , & ! air tmp reference level         (K)
           Qrefn   , & ! air sp hum reference level      (kg/kg)
           Urefn   , & ! air speed reference level       (m/s)
-          Qsurn   , & ! surface specific humidity       (kg/kg)
           freshn  , & ! fresh water flux to ocean       (kg/m2/s)
           fsaltn  , & ! salt flux to ocean              (kg/m2/s)
           fhocnn  , & ! actual ocn/ice heat flx         (W/m**2)
@@ -120,7 +119,6 @@
           Tref    , & ! air tmp reference level         (K)
           Qref    , & ! air sp hum reference level      (kg/kg)
           Uref    , & ! air speed reference level       (m/s)
-          Qsur    , & ! surface specific humidity       (kg/kg)
           fresh   , & ! fresh water flux to ocean       (kg/m2/s)
           fsalt   , & ! salt flux to ocean              (kg/m2/s)
           fhocn   , & ! actual ocn/ice heat flx         (W/m**2)
@@ -132,14 +130,17 @@
           snoice      ! snow-ice growth                 (m)
 
       real (kind=dbl_kind), intent(in), optional :: &
-          ilmon           ! inverse Obukov lengthscale              (1/m)
+          Qsurn   , & ! surface specific humidity       (kg/kg)
+          ilmon       ! inverse Obukov lengthscale      (1/m)
           
       real (kind=dbl_kind), intent(inout), optional :: &
           fswthru_vdr , & ! vis dir sw radiation through ice bot    (W/m**2)
           fswthru_vdf , & ! vis dif sw radiation through ice bot    (W/m**2)
           fswthru_idr , & ! nir dir sw radiation through ice bot    (W/m**2)
           fswthru_idf , & ! nir dif sw radiation through ice bot    (W/m**2)
+          Qsur        , & ! surface specific humidity	            (kg/kg)
           ilmo            ! inverse Obukov lengthscale              (1/m)
+
 
       real (kind=dbl_kind), optional, dimension(:), intent(inout):: &
           Qref_iso, & ! isotope air sp hum reference level (kg/kg)
@@ -164,8 +165,10 @@
 
       strairxT   = strairxT + strairxn  * aicen
       strairyT   = strairyT + strairyn  * aicen
+
       Cdn_atm_ratio = Cdn_atm_ratio + &
                       Cdn_atm_ratio_n   * aicen
+
       fsurf      = fsurf    + fsurfn    * aicen
       fcondtop   = fcondtop + fcondtopn * aicen 
       fcondbot   = fcondbot + fcondbotn * aicen 
@@ -174,16 +177,19 @@
       fswabs     = fswabs   + fswabsn   * aicen
       flwout     = flwout   &
            + (flwoutn - (c1-emissivity)*flw) * aicen
+
       evap       = evap     + evapn     * aicen
       evaps      = evaps    + evapsn    * aicen
       evapi      = evapi    + evapin    * aicen
+
       Tref       = Tref     + Trefn     * aicen
       Qref       = Qref     + Qrefn     * aicen
       Uref       = Uref     + Urefn     * aicen
-      Qsur       = Qsur     + Qsurn     * aicen
-
+      if(present(Qsur) .and. present(Qsurn)) &
+         Qsur    = Qsur     + Qsurn     * aicen
       if (present(ilmo) .and. present(ilmon)) &
          ilmo    = ilmo     + ilmon     * aicen
+
 
       ! Isotopes
       if (tr_iso) then
@@ -214,12 +220,14 @@
 
       ! ice/snow thickness
 
+
       meltt     = meltt     + melttn    * aicen
       meltb     = meltb     + meltbn    * aicen
       melts     = melts     + meltsn    * aicen
       congel    = congel    + congeln   * aicen
       snoice    = snoice    + snoicen   * aicen
       
+
       end subroutine merge_fluxes
 
 !=======================================================================

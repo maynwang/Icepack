@@ -885,7 +885,7 @@
                                fzsal,      flux_bio,   &
                                nbtrcr,     nblyr,      &
                                nfsd,       d_afsd_latm,&
-                               floe_rad_c, floe_binwidth,&)
+                               floe_rad_c, floe_binwidth,&
                                meltln )
 
       real (kind=dbl_kind), intent(in) :: &
