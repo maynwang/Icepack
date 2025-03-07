@@ -48,24 +48,33 @@ CONTAINS
       real (kind=dbl_kind), dimension(nilyr), intent(out)  ::  Tni     
       real  ::  zns, zni, x1, x2, f1, f2      
    
-      print *, 'OPENING FILE?' 
+      ! print *, 'OPENING FILE?' 
       
-      filename = data_buoy_dir !'/home/map005/data/eccc-ppp2/SIMBA_data/gca0103td2017022715'
-      
+      ! filename = data_buoy_dir !'/home/map005/data/eccc-ppp2/SIMBA_data/gca0103td2017022715'
+      filename = '/home/mwang/ICEPACK_MP/Buoy_data/SIMBA_2024_init.txt'
+
       print *, filename
          OPEN(UNIT=1,FILE=filename,FORM="FORMATTED",STATUS="OLD",ACTION="READ")
       print *, 'reading is not the problem...'
-         read(1,FMT=*) lat_col
-	 print *, 'nor is reading the latitude...'       
-         read(1,FMT=*) lon_col
-	 print *, lat_buoy, lon_buoy
+         ! read(1,FMT=*) lat_col
+	 ! print *, 'nor is reading the latitude...'       
+         ! read(1,FMT=*) lon_col
+	 ! print *, lat_buoy, lon_buoy
 
-         read(1,FMT=*) Tair_buoy
-         read(1,FMT=*) hs
-         read(1,FMT=*) hi
-         read(1,FMT=*) nsdata 
-         read(1,FMT=*) nidata  
-         
+         ! read(1,FMT=*) Tair_buoy
+         ! read(1,FMT=*) hs
+         ! read(1,FMT=*) hi
+         ! read(1,FMT=*) nsdata 
+         ! read(1,FMT=*) nidata  
+        
+         lat_col = 54.96069
+         lon_col = -59.67123
+         hs = 30 ! cm
+         hi = 39 ! cm
+         Tair_buoy = -15 ! deg. C
+         nsdata = 10 ! Snow temperature profile (sensors 80-89)
+         nidata = 19 ! Ice temperature profile (sensors 90-108)
+
          hs = hs/1d2
          hi = hi/1d2
          lat_buoy = lat_col
@@ -77,6 +86,29 @@ CONTAINS
          ALLOCATE( Tsnow(nsdata))                 
          ALLOCATE( Tice(nidata) )  !  , STAT=ierror 
          
+         ! -----------------------------------------------------
+         ! Read the full temperature profile from the file (all 241 sensors)
+         ! Added my MW, Mar. 7
+        print *, 'Allocating full temperature profile for 241 sensors'
+        ALLOCATE(profile(241))
+        
+        ! Reading the profile data from file
+        do n = 1, 241
+            read(1,*) profile(n)    ! Read temperatures from file
+        enddo
+
+        ! Extract snow data (indices 80 to 89 from the profile)
+        Tsnow = profile(80:89)
+
+        ! Extract ice data (indices 90 to 108 from the profile)
+        Tice = profile(90:108)
+
+        ! Print extracted profiles for validation
+        print *, 'Snow temperature profile (80-89): ', Tsnow
+        print *, 'Ice temperature profile (90-108): ', Tice
+
+        ! ------------------------------------------------------
+
          do n = 1,nsdata    
             read(1,FMT=*) Tsnow(n)
          enddo
