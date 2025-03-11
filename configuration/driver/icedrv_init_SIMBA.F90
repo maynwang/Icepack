@@ -47,7 +47,8 @@ CONTAINS
       real (kind=dbl_kind), dimension(nslyr), intent(out)  ::  Tns 
       real (kind=dbl_kind), dimension(nilyr), intent(out)  ::  Tni     
       real  ::  zns, zni, x1, x2, f1, f2      
-   
+      real(kind=dbl_kind), allocatable :: profile(:) 
+
       ! print *, 'OPENING FILE?' 
       
       ! filename = data_buoy_dir !'/home/map005/data/eccc-ppp2/SIMBA_data/gca0103td2017022715'
@@ -109,15 +110,6 @@ CONTAINS
 
         ! ------------------------------------------------------
 
-         do n = 1,nsdata    
-            read(1,FMT=*) Tsnow(n)
-         enddo
-         
-         do n = 1,nidata    
-            read(1,FMT=*) Tice(n)
-         enddo
-         print *, Tsnow
-         print *, Tice
          
         do ns = 1, nslyr
 	    zns = ((2d0*ns)-1)*(hs*1d2)/(2d0*nslyr)

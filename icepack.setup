@@ -665,7 +665,8 @@ foreach envname ( $nenvnames )
       endif
     endif
 
-    set rundir = ${ICE_MACHINE_WKDIR}/${casename}
+    # set rundir = ${ICE_MACHINE_WKDIR}/${casename}
+    set rundir = /home/mang/ICEPACK_MP/icepack-dirs/runs/${casename}
 
     #------------------------------------------------------------
     # Compute a default blocksize

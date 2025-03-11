@@ -127,7 +127,7 @@ CONTAINS
          !
       ENDIF
 
-          CALL fld_read_rpn( kt, kt, sf, GEM_rpn_list)
+         ! CALL fld_read_rpn( kt, kt, sf, GEM_rpn_list)
 
       tprecip(:,:)     = sf(jp_prec)%fnow(:,:,1)  !Total precipitation
       sprecip(:,:)     = sf(jp_snow)%fnow(:,:,1)  !Snow precipitation
