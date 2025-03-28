@@ -20,8 +20,7 @@ module gemdrv_sbc_rpntls
    CHARACTER (LEN=16), PUBLIC :: current_atmf, & ! RPN formatted date (atm field no 2)
   &                              Mod_runstrt_S   ! RPN formatted date (simulation starting time)
 
-   PUBLIC incdatsd, datp2f, datf2p, prsdate, pdfjdate2, inter_field3, &
-          d_rawfstw, r_rawfstw, r_rawfstwm
+   PUBLIC incdatsd, datp2f, datf2p, prsdate, pdfjdate2, inter_field3
           
 
 CONTAINS
@@ -267,113 +266,6 @@ CONTAINS
 
       END SUBROUTINE inter_field3
 
-
-      subroutine d_rawfstw (rs,nx,ny,varname,stepno,dt,date0,out_file)
-
-      implicit none
-!
-      integer :: nx,ny,stepno,date0
-      real(kind=wp) :: dt
-      real(kind=wp) :: rs(nx,ny)
-      character(LEN=*) :: varname,out_file
-!
-      integer fnom,fclos
-      integer id_unit,err,ip2
-!
-      real(kind=sp) :: rl_work(nx,ny)
-!----------------------------------------------------------------------
-      id_unit=0
-      err = fnom (id_unit, out_file, 'rnd', 0)
-      call fstouv (id_unit,'rnd')
-!
-      ip2 =(stepno*dt)/3600
-      rl_work=REAL(rs,sp)   ! conversion to single precision 
-      call fstecr (rl_work,rl_work,-32,id_unit, date0, NINT(max(dt,3600.0)), stepno, nx,ny,1, &
-                &  0,ip2,0,'P',varname,'rslt2','X',1,1,1,1,1,.false.)
-
-      call fstfrm (id_unit)
-      err = fclos (id_unit)
-!
-      return
-      end subroutine d_rawfstw
-
-
-      subroutine r_rawfstw (rs,nx,ny,varname,stepno,dt,date0,out_file)
-
-      implicit none
-!
-      integer :: nx,ny,stepno,date0
-      real(kind=wp) :: dt
-      real(kind=sp) :: rs(nx,ny)
-      character(LEN=*) :: varname,out_file
-!
-      integer fnom,fclos
-      integer id_unit,err,ip2
-!----------------------------------------------------------------------
-      id_unit=0
-      err = fnom (id_unit, out_file, 'rnd', 0)
-      call fstouv (id_unit,'rnd')
-!
-      ip2 =(stepno*3600.0)/3600
-      call fstecr (rs,rs,-32,id_unit, date0, NINT(dt), stepno, nx,ny,1, &
-                &  0,ip2,0,'P',varname,'rslt2','X',1,1,1,1,1,.false.)
-
-      call fstfrm (id_unit)
-      err = fclos (id_unit)
-!
-      return
-      end subroutine r_rawfstw
-
-      subroutine r_rawfstwm (rs,ms,nx,ny,varname,stepno,dt,date0,out_file)
-
-      implicit none
-!
-      integer :: nx,ny,stepno,date0
-      real(kind=wp) :: dt
-      real(kind=sp) :: rs(nx,ny),ms(nx,ny)
-      character(LEN=*) :: varname,out_file
-!
-      integer fnom,fclos
-      integer id_unit,err,ip2,i,j
-      integer(kind=sp):: wms(nx,ny),nmean
-      real(kind=sp) ::   wrs(nx,ny), rmean
-
-!----------------------------------------------------------------------
-
-      rmean=0.
-      nmean=0
-      do j=1,ny
-      do i=1,nx
-        wms(i,j)=nint(ms(i,j))
-        if (wms(i,j).eq.1) then
-           rmean=rmean+rs(i,j)
-           nmean=nmean+1
-        endif
-      enddo
-      enddo
-      if (nmean.gt.0) rmean=rmean/nmean
-      do j=1,ny
-      do i=1,nx
-        wrs(i,j)=rs(i,j)
-        if (wms(i,j).ne.1) wrs(i,j)=rmean
-      enddo
-      enddo
-
-      id_unit=0  
-      err = fnom (id_unit, out_file, 'rnd', 0)
-      call fstouv (id_unit,'rnd')
-!
-      ip2 =(stepno*3600.0)/3600
-      call fstecr (wrs,wrs,-32,id_unit, date0, NINT(dt), stepno, nx,ny,1, &
-                &  0,ip2,0,'P@',varname,'rslt2','X',1,1,1,1,1,.false.)
-      call fstecr (wms,wms,-1,id_unit, date0, NINT(dt), stepno, nx,ny,1, &
-                &  0,ip2,0,'@@',varname,'rslt2','X',1,1,1,1,2,.false.)
-
-      call fstfrm (id_unit)
-      err = fclos (id_unit)
-!
-      return
-      end subroutine r_rawfstwm
 
 
 end module gemdrv_sbc_rpntls
