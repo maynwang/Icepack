@@ -111,6 +111,7 @@ CONTAINS
         ENDDO
         
         kt_sbc=kt-1	
+        GEM_rpn_list = GEM_rpn_list//'.txt'
         call init_atm (sd, GEM_rpn_list) ! get the initial forcing for step 0
         
       ENDIF
