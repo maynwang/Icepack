@@ -55,8 +55,8 @@ MODULE gemdrv_read_rpn
                                         !: do nothing if left to -9.
   
 
-   INTEGER, PUBLIC  ::   jpi = 528   ! = ( jpiglo-2*jpreci + (jpni-1) ) / jpni + 2*jpreci   !: first  dimension
-   INTEGER, PUBLIC  ::   jpj = 735  ! = ( jpjglo-2*jprecj + (jpnj-1) ) / jpnj + 2*jprecj   !: second dimension  
+   INTEGER, PUBLIC  ::   jpi = 1801   ! = ( jpiglo-2*jpreci + (jpni-1) ) / jpni + 2*jpreci   !: first  dimension
+   INTEGER, PUBLIC  ::   jpj =  1251 ! = ( jpjglo-2*jprecj + (jpnj-1) ) / jpnj + 2*jprecj   !: second dimension  
    REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:) :: lat_rpn
    REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:) :: lon_rpn   
    
@@ -517,8 +517,7 @@ CONTAINS
       ind_col = minloc(wrk_col)
       i_col = ind_col(1)
       j_col = ind_col(2)
-      print *, 'POSITION: ', lon_col, lat_col, lat_rpn(i_col,j_col), lon_rpn(i_col,j_col)
-      print *, 'POSITION2: ', lon_col, lat_col, lat_rpn(j_col,i_col), lon_rpn(j_col,i_col)  
+      print *, 'POSITION: ', lon_col, lat_col, lat_rpn(i_col,j_col), lon_rpn(i_col,j_col) 
       return
       END SUBROUTINE get_col_position      
       
