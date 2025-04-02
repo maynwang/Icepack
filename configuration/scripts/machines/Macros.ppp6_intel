@@ -36,10 +36,8 @@ else
 endif
 LD:= $(FC)
 
-ifeq ($(ICE_IOTYPE), netcdf)
    INCLDIR += $(shell nf-config --fflags)
    SLIBS   := $(shell nf-config --flibs)
-endif
 
 ifeq ($(ICE_THREADED), true) 
    LDFLAGS += -qopenmp
