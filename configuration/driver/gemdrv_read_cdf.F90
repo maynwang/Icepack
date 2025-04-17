@@ -134,11 +134,11 @@ CONTAINS
       print *, 'Changing the forcing data'
       
       call prsdate   (yy,mo,dd,hh,mm,ss,dum,datev,1)      
-      if (yy < 2011)  then 
+      !if (yy < 2011)  then 
  	  dt_gem_atm = 3600.
-      else 
-           dt_gem_atm = 3600.*3.0
-      endif      
+      !else 
+      !     dt_gem_atm = 3600.*3.0
+      !endif      
          dayfrac = dble(dt_gem_atm)*rsid 
          call incdatsd (daten,current_atmf,dayfrac)
            print *, 'Going into atm_get_data, datev : ', datev     
@@ -155,7 +155,7 @@ CONTAINS
         b=1.
       endif
 
-      print *, 'interpolating'
+      print *, 'interpolating with b = ', b
       DO jf = 1, SIZE( sd )
         call inter_field3 (b,sd(jf)%fdta(:,:,1,1), &
                              sd(jf)%fdta(:,:,1,2), &
@@ -207,13 +207,13 @@ CONTAINS
       character*16 datev2
       character*512 GEM_cdf_list
       TYPE(FLD), INTENT(inout), DIMENSION(:) ::   sd
-      integer datm, dum
+      integer datm, dum,ktgem
       real KNAMS,kprec
       parameter (KNAMS=0.514791)
       integer i,j,iavg,navg,nivr,nivt,nivm
       integer, dimension(2) :: lev_nul=(/-1,-1/), lev_wrk
       integer yy,mo,dd,hh,mm,ss
-      INTEGER :: ni, nj
+      INTEGER :: ni, nj,t
     
       real*8  dayfrac,one,sid,rsid
       character*16 datew
@@ -225,13 +225,10 @@ CONTAINS
 
 
       call prsdate   (yy,mo,dd,hh,mm,ss,dum,datev,1)      
-      if (yy < 2011)  then 
- 	  dt_gem_prc = 3600.
-      else 
-           dt_gem_prc = 3600.*3.0
-      endif    
-      kprec=1000./dt_gem_prc
-      print *, 'starting to write the cdf into arrays'
+
+      ktgem =hh + 1
+      print *, 'Finding the time level: ', hh, dt_gem_atm, ktgem
+      print *, 'starting to write the cdf into arrays, at time level ', ktgem
 
       !Get a string with format YYYMMDD00      
       write(date00(1:10),10) yy,mo,dd
@@ -244,37 +241,37 @@ CONTAINS
       !Get the netcdf file for the u wind component
       filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_u10.nc'
       call update_variable_dimensions(filename)
-      call readatm_fromCDF ( sd(1)%fdta (:,:,1,2),jpi,jpj,hh,'u_wind',filename,datev,KNAMS,0.)
+      call readatm_fromCDF ( sd(1)%fdta (:,:,1,2),jpi,jpj,ktgem,'u_wind',filename,datev,KNAMS,0.)
 	  print *, 'UUOR sample : ', sd(1)%fdta(50,50,1,2)
 
       !Get the netcdf file for the v wind component
       filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_v10.nc'
-      call readatm_fromCDF ( sd(2)%fdta (:,:,1,2),jpi,jpj,hh,'v_wind',filename,datev,KNAMS,0.)
+      call readatm_fromCDF ( sd(2)%fdta (:,:,1,2),jpi,jpj,ktgem,'v_wind',filename,datev,KNAMS,0.)
 	  print *, 'VUOR sample : ', sd(2)%fdta(50,50,1,2)
 	
       !Get the netcdf file for the humidity
       filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_q2.nc'
-      call readatm_fromCDF ( sd(3)%fdta (:,:,1,2),jpi,jpj,hh,'qair'  ,filename,datev,1.0,0.)
+      call readatm_fromCDF ( sd(3)%fdta (:,:,1,2),jpi,jpj,ktgem,'qair'  ,filename,datev,1.0,0.)
 	  print *, 'HU sample : ', sd(2)%fdta(50,50,1,2)
 
       !Get the netcdf file for the short-wave radiations
       filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_qsw.nc'
-      call readatm_fromCDF ( sd(4)%fdta (:,:,1,2),jpi,jpj,hh,'solar'  ,filename,datev,1.0  ,0.)
+      call readatm_fromCDF ( sd(4)%fdta (:,:,1,2),jpi,jpj,ktgem,'solar'  ,filename,datev,1.0  ,0.)
 	  print *, 'FB sample : ', sd(4)%fdta(50,50,1,2)
 	  
       !Get the netcdf file for the long-wave radiations
       filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_qlw.nc'
-      call readatm_fromCDF ( sd(5)%fdta (:,:,1,2),jpi,jpj,hh,'therm_rad'  ,filename,datev,1.0  ,0.)
+      call readatm_fromCDF ( sd(5)%fdta (:,:,1,2),jpi,jpj,ktgem,'therm_rad'  ,filename,datev,1.0  ,0.)
 	  print *, 'FI sample : ', sd(5)%fdta(50,50,1,2)
 	  
       !Get the netcdf file for the air temperature
       filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_t2.nc'
-      call readatm_fromCDF ( sd(6)%fdta (:,:,1,2),jpi,jpj,hh,'tair'  ,filename,datev,1.0,0.)
+      call readatm_fromCDF ( sd(6)%fdta (:,:,1,2),jpi,jpj,ktgem,'tair'  ,filename,datev,1.0,0.)
 	  print *, 'TT sample : ', sd(6)%fdta(50,50,1,2)
 
       !Get the netcdf file for the precipitations
       filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_precip.nc'
-      call readatm_fromCDF ( sd(7)%fdta (:,:,1,2),jpi,jpj,hh,'precip'  ,filename,datev,kprec,0.)
+      call readatm_fromCDF ( sd(7)%fdta (:,:,1,2),jpi,jpj,ktgem,'precip'  ,filename,datev,kprec,0.)
 	  print *, 'PR sample : ', sd(7)%fdta(50,50,1,2) 
 
       print *, 'zlev_gem :', zlev_gem
@@ -284,7 +281,7 @@ CONTAINS
           
           !Get the netcdf file for the sea level pressure (therm level height)
           filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_slp.nc'
-          call readatm_fromCDF (sd(11)%fdta(:,:,1,2),jpi,jpj,hh,'atmpres' ,filename,datev,100.0,0.)
+          call readatm_fromCDF (sd(11)%fdta(:,:,1,2),jpi,jpj,ktgem,'atmpres' ,filename,datev,100.0,0.)
 	      print *, 'PX sample : ', sd(11)%fdta(50,50,1,2)
 	      
           !Get the netcdf file for the sea level pressure (mometum level height)
