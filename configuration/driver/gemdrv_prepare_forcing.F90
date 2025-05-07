@@ -173,7 +173,8 @@ CONTAINS
       INTEGER  ::   ierror      ! return error code
   
 	print *, 'Allocating the column forcing vectors'      
-
+        print *, 'ktmax : ', ktmax
+        print *, 'zlvl_col',zlvl_col
 
          ALLOCATE( zlvl_col(ktmax),  STAT=ierror )         ! set sf structure
          ALLOCATE( zlvt_col(ktmax),  STAT=ierror )
@@ -193,6 +194,7 @@ CONTAINS
          ALLOCATE( fsnow_col(ktmax), STAT=ierror )
          ALLOCATE( frain_col(ktmax), STAT=ierror )
 
+        print *, 'Size', SIZE(zlvl_col)
       return
    END SUBROUTINE alloc_col_forcing  
    

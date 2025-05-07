@@ -104,6 +104,10 @@ CONTAINS
          !
 
          ALLOCATE( sf(jfld), STAT=ierror )         ! set sf structure
+         IF (ierror /= 0) THEN
+            PRINT *, "Error allocating sf"
+            STOP
+         END IF
          ALLOCATE( tprecip(jpi,jpj), STAT=ierror )
          ALLOCATE( sprecip(jpi,jpj), STAT=ierror )
          ALLOCATE( cat_i_rpn(jpi,jpj), STAT=ierror )
@@ -115,14 +119,14 @@ CONTAINS
          ALLOCATE( wndj_ice(jpi,jpj), STAT=ierror )
          ALLOCATE( qlw_ice(jpi,jpj,1), STAT=ierror )
          ALLOCATE( qsr_ice(jpi,jpj,1), STAT=ierror )
-       
-
+         ALLOCATE( rhor_rpn(jpi,jpj), STAT=ierror )     
+         ALLOCATE( ustr_rpn(jpi,jpj), STAT=ierror )
             DO ifpr= 1, jfld
               ALLOCATE( sf(ifpr)%fnow(jpi,jpj,1) )
               ALLOCATE( sf(ifpr)%fdta(jpi,jpj,1,2) )
             END DO
             
-         ! First estimation of air density and ustar
+        ! First estimation of air density and ustar
            rhor_rpn(:,:) = rhor_ref
            ustr_rpn(:,:) = 0.
          !

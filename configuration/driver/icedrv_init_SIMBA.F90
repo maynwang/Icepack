@@ -52,7 +52,7 @@ CONTAINS
       ! print *, 'OPENING FILE?' 
       
       ! filename = data_buoy_dir !'/home/map005/data/eccc-ppp2/SIMBA_data/gca0103td2017022715'
-      filename = '/home/mwang/ICEPACK_MP/Buoy_data/SIMBA_2024_init.txt'
+      filename = data_buoy_dir !'/home/mwang/ICEPACK_MP/Forcing/SIMBA_2024_init.txt'
 
       print *, filename
          OPEN(UNIT=1,FILE=filename,FORM="FORMATTED",STATUS="OLD",ACTION="READ")

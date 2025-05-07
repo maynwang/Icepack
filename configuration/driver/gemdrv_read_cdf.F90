@@ -98,11 +98,19 @@ CONTAINS
 
 
       ! The following is to get the date string (datev, which is the current file name) right
+      
+      print *, 'datev, Mod_runstrt',datev, Mod_runstrt_S
+      print *, 'Dayfrac and rsid are : ', dayfrac, rsid
       dayfrac = dble(kt_sbc)*max(dt,3600.0)*rsid ! current timestep into seconds from sim start       
       call incdatsd  (datev,Mod_runstrt_S,dayfrac) !getting the date of current time
+      print *, 'dt: ', dt
+      print *, 'dayfrac: ',dayfrac
+      print *, 'kt_sbc: ', kt_sbc
+      print *, 'rsid: ', rsid
+      print *, 'datev after incatsd', datev
       call prsdate   (yy,mo,dd,hh,mm,ss,dum,datev,1) !from date string to yy,mm,etc
       call pdfjdate2 (tforc_2,yy,mo,dd,hh,mm,ss) ! get current time (sec) into tforc_2
-      
+      print *,'datev after calls',datev
       ! Now we retrieve the first forcing data
       print *, 'Going into (initial) atm_get_data, datev, dayfrac : ', datev, dayfrac, dt
       call atm_getdata_cdf(GEM_cdf_list,datev,.false.,.true.,sd) ! get the date for current time (datev)

@@ -1027,7 +1027,7 @@
       
       !This is the .txt containing the list of rpn containing GEM data
       !It is used by fnom to load the forcing data.
-      GEM_data_file = 'GEM_atm_forcing'   
+      GEM_data_file = 'GEM_atm_forcing'
       GEM_rpn_list = trim(data_dir)//'/GEM/'//trim(GEM_data_file)
       print *, npt, idate0, dt
       if (dt .lt. 3600) then

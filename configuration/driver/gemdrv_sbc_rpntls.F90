@@ -20,7 +20,7 @@ module gemdrv_sbc_rpntls
    CHARACTER (LEN=16), PUBLIC :: current_atmf, & ! RPN formatted date (atm field no 2)
   &                              Mod_runstrt_S   ! RPN formatted date (simulation starting time)
 
-   PUBLIC incdatsd, datp2f, datf2p, prsdate, pdfjdate2, inter_field3
+   PUBLIC incdatsd, prsdate, pdfjdate2, inter_field3
           
 
 CONTAINS
@@ -39,10 +39,15 @@ CONTAINS
 
       call pdfjdate(jolddate,oldyy,oldmo,olddd,oldhh,oldmm,oldss)
       jnewdate=jolddate+dt
-
+      print *, 'jnewdate: ', jnewdate
+      print *, 'joldate: ', jolddate
+      print *, 'dt: ', dt
+      print *, 'prsdate vars: ', oldyy,oldmo,olddd,oldhh,oldmm,oldss,oldsign  
+      print *, 'jolddate: ', jolddate
       call pdfcdate(newyy,newmo,newdd,newhh,newmm,newss,jnewdate)
-
+      print *, 'pdfcdate outputs: ',newyy,newmo,newdd,newhh,newmm,newss,jnewdate
       write(newdate,12) newyy,newmo,newdd,newhh,newmm,newss
+      print *, 'newdate: ', newdate
  12   format(i4.4,i2.2,i2.2,'.',i2.2,i2.2,i2.2)
       return
 
@@ -80,7 +85,7 @@ CONTAINS
       chh=tmpdate(10:11)
       cmm=tmpdate(12:13)
       css=tmpdate(14:15)
-
+PRINT *, "Reading value from input file...date = ", date
       read(cyy,'(I4)') yy
       read(cmo,'(I2)') mo
       read(cdd,'(I2)') dd
@@ -188,68 +193,6 @@ CONTAINS
 
       END SUBROUTINE pdfcdate
 
-      SUBROUTINE datp2f (fstdate,mc2date)
-      IMPLICIT NONE
-
-      integer :: fstdate
-      character(LEN=*) :: mc2date
-      integer :: yy,mo,dd,hh,mm,ss,dat2,dat3,newdate,err
-      character(LEN=4) :: cyy
-      character(LEN=2) :: cmo,cdd,chh,cmm,css
-!-----------------------------------------------------------
-      cyy=mc2date(1:4)
-      cmo=mc2date(5:6)
-      cdd=mc2date(7:8)
-      chh=mc2date(10:11)
-      cmm=mc2date(12:13)
-      css=mc2date(14:15)
-
-      read(cyy,'(I4)') yy
-      read(cmo,'(I2)') mo
-      read(cdd,'(I2)') dd
-      read(chh,'(I2)') hh
-      read(cmm,'(I2)') mm
-      read(css,'(I2)') ss
-
-      dat2= yy*10000 + mo*100 + dd
-      dat3= hh*1000000 + mm*10000 + ss*100
-      err = newdate(fstdate,dat2,dat3,3)
-
-      RETURN
-      END SUBROUTINE datp2f
-
-      subroutine datf2p (mc2date,fstdate)
-      implicit none
-!
-      character(LEN=*) :: mc2date
-      integer :: fstdate
-!
-!ARGUMENTS 
-!     NAMES     I/O  TYPE  A/S DESCRIPTION
-!
-!     mc2date    O     C    S  date encoded in mc2 format
-!     fstdate    I     I    S  date encoded in RPN standard file format
-!
-!MODULES 
-!
-!
-      integer :: yy,mo,dd,hh,mm,ss
-      integer :: dat2,dat3,newdate,err
-!     
-      err= newdate(fstdate,dat2,dat3,-3)
-!
-      yy = dat2/10000
-      mo = mod(dat2,10000)/100
-      dd = mod(dat2,100)
-      hh = dat3/1000000
-      mm = mod(dat3,1000000)/10000
-      ss = mod(dat3,10000)/100
-!
-      write(mc2date(1:16),10) yy,mo,dd,hh,mm,ss
- 10   format(i4.2,i2.2,i2.2,'.',i2.2,i2.2,i2.2,' ')
-!
-      return
-      END SUBROUTINE datf2p
 
       SUBROUTINE inter_field3 (b,fdta1,fdta2,fnow,ni,nj)
       implicit none
