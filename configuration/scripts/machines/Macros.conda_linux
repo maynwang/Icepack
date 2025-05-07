@@ -9,8 +9,15 @@ CPPDEFS    := -DFORTRANUNDERSCORE ${ICE_CPPDEFS}
 CFLAGS     := -c -O2
 
 # Flags for the Fortran compiler
-FREEFLAGS  := -ffree-form
+FREEFLAGS  := -g -O0 -ffree-form
 FFLAGS     := -fconvert=big-endian -fbacktrace -ffree-line-length-none
+
+# NetCDF Fortran includes and libraries from conda
+INCLDIR := $(shell nf-config --fflags)
+SLIBS   := $(shell nf-config --flibs)
+
+# Add NetCDF include flags to the compiler flags
+FFLAGS += $(INCLDIR)
 
 # Additional flags for the Fortran compiler when compiling in debug mode
 ifeq ($(ICE_BLDDEBUG), true)
