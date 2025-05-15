@@ -248,6 +248,7 @@ CONTAINS
 
       !Get the netcdf file for the u wind component
       filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_u10.nc'
+      print *, 'filename: ', filename
       call update_variable_dimensions(filename)
       call readatm_fromCDF ( sd(1)%fdta (:,:,1,2),jpi,jpj,ktgem,'u_wind',filename,datev,KNAMS,0.)
 	  print *, 'UUOR sample : ', sd(1)%fdta(50,50,1,2)
@@ -281,7 +282,8 @@ CONTAINS
       filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_precip.nc'
       call readatm_fromCDF ( sd(7)%fdta (:,:,1,2),jpi,jpj,ktgem,'precip'  ,filename,datev,kprec,0.)
 	  print *, 'PR sample : ', sd(7)%fdta(50,50,1,2) 
-
+          !print *, 'filename: ', filename
+          
       print *, 'zlev_gem :', zlev_gem
       !Getting the sea level pressure
       if (zlev_gem.lt.0.) then

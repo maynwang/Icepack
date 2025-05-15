@@ -287,6 +287,12 @@
       ! Compute variables needed for vertical thermo calculation
       !-----------------------------------------------------------------
 
+      print *, "h before init_vertical_profile: ", hin, hsn, aicen, vicen, vsnon
+
+      print *, "zT before init_vertical_profile: ", zTin, zTsn
+
+      print *, "zS before init_vertical_profile: ", zSin, einit
+
       call init_vertical_profile (nilyr,    nslyr,   &
                                   aicen,             &
                                   vicen,    vsnon,   &
@@ -296,6 +302,15 @@
                                   zqsn,     zTsn,    &
                                   zSin,              &
                                   einit )
+
+
+      print *, "h After init_vertical_profile: ", hin, hsn, aicen, vicen, vsnon
+
+      print *, "zT After init_vertical_profile: ", zTin, zTsn
+
+      print *, "zS After init_vertical_profile: ", zSin, einit
+
+
       if (icepack_warnings_aborted(subname)) return
 
       ! Save initial ice and snow thickness (for fresh and fsalt)
@@ -2514,6 +2529,11 @@
       ! Compute lateral and bottom heat fluxes.
       !-----------------------------------------------------------------
 
+        ! print *, "aice, vicen, vsnon before frzmlt: ", aicen, vicen, vsnon
+ 
+       ! print *, "zq beofre frzmlt_bottom_lateral: ", zqin, zsqn
+  
+
       if (ktherm >= 0) then
          call frzmlt_bottom_lateral (dt,        ncat,      &
                                     nilyr,     nslyr,     &
@@ -2528,6 +2548,10 @@
                                     rside,     Cdn_ocn,   &
                                     fside)
       endif
+
+       ! print *, "aice, vicen, vsnon after frzmlt: ", aicen, vicen, vsnon
+      
+       ! print *, "zq after frzmlt_bottom_lateral: ", zqin, zsqn
 
       if (icepack_warnings_aborted(subname)) return
 

@@ -344,8 +344,7 @@
         
         ! ice energy
         qin(1) = -rhoi * Lfresh 
-        
-        ! snow energy
+       ! snow energy
         qsn(1) = -rhos * Lfresh 
         
       endif               ! heat_capacity
@@ -356,7 +355,7 @@
 !autodocument_start icepack_liquidus_temperature
 ! compute liquidus temperature
 
-      subroutine icepack_init_trcr_SIMBA(Tair,     Tf,       &
+        subroutine icepack_init_trcr_SIMBA(Tair,     Tf,       &
                                   Sprofile, Tprofile, &
                                   Tsfc,  Tni,             &
                                   nilyr,    nslyr,    &
@@ -393,16 +392,20 @@
       if (calc_Tsfc) Tsfc = min(Tsmelt, Tair) ! deg C
       
       if (heat_capacity) then
-        
         ! ice enthalpy
         do k = 1, nilyr
-
           if (ktherm == 2) then
             qin(k) = enthalpy_mush(Tni(k), Sprofile(k))
           else
+          print *, 'Before qin(k)'
+          print *, qin(k), Tni(k), Tni(4)
+                
             qin(k) = -(rhoi * (cp_ice*(Tprofile(k)-Tni(k)) &
                 + Lfresh*(c1-Tprofile(k)/Tni(k)) - cp_ocn*Tprofile(k)))
-          endif
+        print *, "After else statement"
+        print *, qin(k), Tni(k), Tni(4)
+        endif
+          
         enddo               ! nilyr
         
         ! snow enthalpy
@@ -414,7 +417,6 @@
         
         ! ice energy
         qin(1) = -rhoi * Lfresh 
-        
         ! snow energy
         qsn(1) = -rhos * Lfresh 
         

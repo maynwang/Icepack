@@ -1356,6 +1356,7 @@
         call get_buoy_data(nslyr, nilyr, Tair_buoy(i), hs, hi, Tns, Tni)
         print *, 'hs in is = ', hs     
         print *, 'hi in is = ', hi
+        print *, 'Tni after call get_buoy_data: ', Tni(1),Tni(2),Tni(3),Tni(4)
         if (3 <= ncat) then      
           do n = 1, ncat
             if ((hi > hin_max(n-1)) .and. (hi < hin_max(n))) then
@@ -1376,15 +1377,16 @@
            aicen(i,n) = ainit(n)
            vicen(i,n) = hinit(n) * ainit(n) ! m
            vsnon(i,n) = hs*ainit(n) !min(aicen(i,n)*hs,p2*vicen(i,n))
-           print *, 'volume is = ', vsnon(i,n)
-           print *, 'area is = ', ainit
            ! tracers
+           print *, qin(:), Tni(:)
+           print *, 'ntqice: ', nt_qice
+           print *, 'Going into icepack_init_trcr_SIMBA'
+           STOP
            call icepack_init_trcr_SIMBA(Tair_buoy(i), Tf   (i  ), &
                                 salinz(i,:), Tmltz(i,:), &
                                 Tsfc, Tni,                   &
                                 nilyr,       nslyr,      &
                                 qin   (  :), qsn  (  :))
-        
            ! surface temperature
            trcrn(i,nt_Tsfc,n) = Tsfc ! deg C
            ! ice enthalpy, salinity 
@@ -1400,19 +1402,20 @@
            if (tr_brine) trcrn(i,nt_fbri,n) = c1
         enddo 
         
-!        print *, 'Tair_buoy = ', Tair_buoy
-!        print *, 'Tf = ', Tf       
-!        print *, 'salinz = ', salinz
-!        print *, 'Tni = ', Tni    
-!        print *, 'Tsfc = ', Tsfc       
-!        print *, 'qin_init = ', qin
-!        print *, 'qsn_init = ', qsn   
-!        print *, 'ldfast snow volumes are = ', vsnon(5,:)
-!	print *, 'ldfast ice volumes are = ', vicen(5,n)  
+        !print *, 'Tair_buoy = ', Tair_buoy
+        !print *, 'Tf = ', Tf       
+        !print *, 'salinz = ', salinz
+        !print *, 'Tni = ', Tni    
+        !print *, 'Tsfc = ', Tsfc       
+        !print *, 'qin_init = ', qin
+        !print *, 'qsn_init = ', qsn   
+        !print *, 'ldfast snow volumes are = ', vsnon(5,:)
+	!print *, 'ldfast ice volumes are = ', vicen(5,n)  
 	
       endif
            
-      
+      STOP
+
       !-----------------------------------------------------------------
       
       ! land

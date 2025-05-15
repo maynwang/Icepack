@@ -167,7 +167,6 @@ PRINT *, "Reading value from input file...date = ", date
       IMPLICIT NONE
       real*8 jdate
       integer yyyy,mo,dd,hh,mm,ss,seconds
-
       real*8 :: f,rj
 !--------------------------------------------------------------------
 
@@ -187,8 +186,41 @@ PRINT *, "Reading value from input file...date = ", date
       endif
       mm = (seconds - hh * 3600 - ss) / 60
       
-      call datec(int(rj),yyyy,mo,dd)
-      
+      ! Comment because datec is an internal function only accessible to ECCC machine
+      ! call datec(int(rj),yyyy,mo,dd)
+      ! Instead, hard code the date conversion:
+
+      !      DeltaDays = rj - 2460310 ! This is the delta days since jan 1 2024
+
+      yyyy = 2024
+
+      if (rj - 2460310 .lt. 32) then
+
+          mo = 01
+
+          dd = rj - 2460310
+
+      elseif (rj - 2460310 .lt. 61) then
+
+          mo = 02
+
+          dd = rj - 2460310 - 31
+
+      elseif (rj - 2460310 .lt. 92) then
+
+          mo = 03
+
+          dd = rj - 2460310 - 31-29
+
+      elseif (rj - 2460310 .lt. 122) then
+
+          mo = 04
+
+          dd = rj - 2460310 - 31-29-30
+
+      endif
+
+
       return
 
       END SUBROUTINE pdfcdate

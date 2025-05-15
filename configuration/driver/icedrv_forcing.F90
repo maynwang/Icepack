@@ -254,6 +254,11 @@
          swidr(:) = c1intp * swidr_data(mlast) + c2intp * swidr_data(mnext)
          swidf(:) = c1intp * swidf_data(mlast) + c2intp * swidf_data(mnext)
 
+         print *, 'Tair: ', Tair(:)
+         print *, 'potT ', potT(:)
+         print *, 'zlvl:', zlvl(:)
+         print *, 'zlvs:', zlvs(:)
+
       elseif (trim(atm_data_type) == 'clim') then
          midmonth = 15  ! assume data is given on 15th of every month
          recslot = 1                             ! latter half of month
@@ -417,6 +422,25 @@
          swvdf(:) = c1intp * swvdf_data(mlast) + c2intp * swvdf_data(mnext)
          swidr(:) = c1intp * swidr_data(mlast) + c2intp * swidr_data(mnext)
          swidf(:) = c1intp * swidf_data(mlast) + c2intp * swidf_data(mnext)
+         print *, "Tair is : ", Tair(:)
+         print *, "Qa is : ", Qa(:)
+         print *, "uatm is : ", uatm(:)
+         print *, "vatm is : ", vatm(:)
+         print *, "fsnow is : ", fsnow(:)
+         print *, "flw is : ", flw(:)
+         print *, "fsw is : ", fsw(:)
+         print *, "zlvl is : ", zlvl(:)
+         print *, "zlvs is : ", zlvs(:)
+         print *, "potT is : ", potT(:)
+         print *, "wind is : ", wind(:)
+         print *, "strax is : ", strax(:)
+         print *, "stray is : ", stray(:)
+         print *, "rhoa is : ", rhoa(:)
+         print *, "frain is : ", frain(:)
+         print *, "swvdr is : ", swvdr(:)
+         print *, "swvdf is : ", swvdf(:)
+         print *, "swidr is : ", swidr(:)
+         print *, "swidf is : ", swidf(:)
          
       endif
 
@@ -1036,9 +1060,9 @@
           nptgem = npt    
       endif
       print *, nptgem
-      
+     
       call prepare_gem_forcing(idate0,nptgem,lat_buoy,lon_buoy,GEM_rpn_list)
-      
+       
       do i = 1, nptgem
          Tair_data (i) = Tair_col (i)
          Qa_data   (i) = Qa_col   (i)
