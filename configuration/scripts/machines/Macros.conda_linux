@@ -21,7 +21,15 @@ FFLAGS += $(INCLDIR)
 
 # Additional flags for the Fortran compiler when compiling in debug mode
 ifeq ($(ICE_BLDDEBUG), true)
-  FFLAGS   += -O0 -g -fcheck=bounds -finit-real=nan -fimplicit-none -ffpe-trap=invalid,zero,overflow
+  FFLAGS   += -O0 -g \
+              -fcheck=all \
+              -finit-real=snan \
+              -finit-integer=-9999 \
+              -fimplicit-none \
+              -ffpe-trap=invalid,zero,overflow,denormal \
+              -fstack-protector-strong \
+              -fsanitize=undefined,address \
+	      -fbacktrace
 else
   FFLAGS   += -O2
 endif

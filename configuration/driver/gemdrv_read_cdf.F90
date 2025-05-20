@@ -93,24 +93,14 @@ CONTAINS
         Mod_runstrt_S(9:9)='.'
         write(Mod_runstrt_S(10:11),'(i2.2)') nh_gem_offs + nn_date0_hour
         Mod_runstrt_S(12:16)='0000 '  !Already assumed in opa
-        print *, 'we get the Mod_runstrt_S : ', Mod_runstrt_S
-        print *, 'Going into atmopenf, with ksbc : ', kt_sbc
 
 
       ! The following is to get the date string (datev, which is the current file name) right
       
-      print *, 'datev, Mod_runstrt',datev, Mod_runstrt_S
-      print *, 'Dayfrac and rsid are : ', dayfrac, rsid
       dayfrac = dble(kt_sbc)*max(dt,3600.0)*rsid ! current timestep into seconds from sim start       
       call incdatsd  (datev,Mod_runstrt_S,dayfrac) !getting the date of current time
-      print *, 'dt: ', dt
-      print *, 'dayfrac: ',dayfrac
-      print *, 'kt_sbc: ', kt_sbc
-      print *, 'rsid: ', rsid
-      print *, 'datev after incatsd', datev
       call prsdate   (yy,mo,dd,hh,mm,ss,dum,datev,1) !from date string to yy,mm,etc
       call pdfjdate2 (tforc_2,yy,mo,dd,hh,mm,ss) ! get current time (sec) into tforc_2
-      print *,'datev after calls',datev
       ! Now we retrieve the first forcing data
       print *, 'Going into (initial) atm_get_data, datev, dayfrac : ', datev, dayfrac, dt
       call atm_getdata_cdf(GEM_cdf_list,datev,.false.,.true.,sd) ! get the date for current time (datev)
@@ -248,43 +238,43 @@ CONTAINS
 
       !Get the netcdf file for the u wind component
       filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_u10.nc'
-      print *, 'filename: ', filename
+      !print *, 'filename: ', filename
       call update_variable_dimensions(filename)
       call readatm_fromCDF ( sd(1)%fdta (:,:,1,2),jpi,jpj,ktgem,'u_wind',filename,datev,KNAMS,0.)
-	  print *, 'UUOR sample : ', sd(1)%fdta(50,50,1,2)
+	  !print *, 'UUOR sample : ', sd(1)%fdta(50,50,1,2)
 
       !Get the netcdf file for the v wind component
       filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_v10.nc'
       call readatm_fromCDF ( sd(2)%fdta (:,:,1,2),jpi,jpj,ktgem,'v_wind',filename,datev,KNAMS,0.)
-	  print *, 'VUOR sample : ', sd(2)%fdta(50,50,1,2)
+	  !print *, 'VUOR sample : ', sd(2)%fdta(50,50,1,2)
 	
       !Get the netcdf file for the humidity
       filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_q2.nc'
       call readatm_fromCDF ( sd(3)%fdta (:,:,1,2),jpi,jpj,ktgem,'qair'  ,filename,datev,1.0,0.)
-	  print *, 'HU sample : ', sd(2)%fdta(50,50,1,2)
+	  !print *, 'HU sample : ', sd(2)%fdta(50,50,1,2)
 
       !Get the netcdf file for the short-wave radiations
       filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_qsw.nc'
       call readatm_fromCDF ( sd(4)%fdta (:,:,1,2),jpi,jpj,ktgem,'solar'  ,filename,datev,1.0  ,0.)
-	  print *, 'FB sample : ', sd(4)%fdta(50,50,1,2)
+	  !print *, 'FB sample : ', sd(4)%fdta(50,50,1,2)
 	  
       !Get the netcdf file for the long-wave radiations
       filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_qlw.nc'
       call readatm_fromCDF ( sd(5)%fdta (:,:,1,2),jpi,jpj,ktgem,'therm_rad'  ,filename,datev,1.0  ,0.)
-	  print *, 'FI sample : ', sd(5)%fdta(50,50,1,2)
+	  !print *, 'FI sample : ', sd(5)%fdta(50,50,1,2)
 	  
       !Get the netcdf file for the air temperature
       filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_t2.nc'
       call readatm_fromCDF ( sd(6)%fdta (:,:,1,2),jpi,jpj,ktgem,'tair'  ,filename,datev,1.0,0.)
-	  print *, 'TT sample : ', sd(6)%fdta(50,50,1,2)
+	  !print *, 'TT sample : ', sd(6)%fdta(50,50,1,2)
 
       !Get the netcdf file for the precipitations
       filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_precip.nc'
       call readatm_fromCDF ( sd(7)%fdta (:,:,1,2),jpi,jpj,ktgem,'precip'  ,filename,datev,kprec,0.)
-	  print *, 'PR sample : ', sd(7)%fdta(50,50,1,2) 
+	  ! print *, 'PR sample : ', sd(7)%fdta(50,50,1,2) 
           !print *, 'filename: ', filename
           
-      print *, 'zlev_gem :', zlev_gem
+      !print *, 'zlev_gem :', zlev_gem
       !Getting the sea level pressure
       if (zlev_gem.lt.0.) then
           !lev_wrk(:) = nivt
@@ -292,7 +282,7 @@ CONTAINS
           !Get the netcdf file for the sea level pressure (therm level height)
           filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_slp.nc'
           call readatm_fromCDF (sd(11)%fdta(:,:,1,2),jpi,jpj,ktgem,'atmpres' ,filename,datev,100.0,0.)
-	      print *, 'PX sample : ', sd(11)%fdta(50,50,1,2)
+	      !print *, 'PX sample : ', sd(11)%fdta(50,50,1,2)
 	      
           !Get the netcdf file for the sea level pressure (mometum level height)
           sd(12)%fdta(:,:,1,2)=sd(11)%fdta(:,:,1,2)
@@ -337,13 +327,13 @@ CONTAINS
       !extraction of the lat and lon arrays      
       if (datev .eq. Mod_runstrt_S) then
             call prsdate   (2001,01,10,00,00,00,dum,datev2,2)
-      	  print *, 'DATEV2: ', datev2
+      	  !print *, 'DATEV2: ', datev2
           allocate(lat_rpn(jpi,jpj))
           allocate(lon_rpn(jpi,jpj))        
           call readlatlon( lat_rpn(:,:),jpi,jpj,'nav_lat',filename)
-	      print *, 'LAT sample : ', lat_rpn(500,500)   
+	   !   print *, 'LAT sample : ', lat_rpn(500,500)   
           call readlatlon( lon_rpn(:,:),jpi,jpj,'nav_lon',filename)
-	      print *, 'LON sample : ', lon_rpn(500,500)     
+	    !  print *, 'LON sample : ', lon_rpn(500,500)     
       endif  
 	  print *, 'END get DATA!!!!'
 	
@@ -372,7 +362,7 @@ CONTAINS
       print *, 'Getting into CDF files for ', dat, t, filename, varname
 
       status = netcdf_check(nf90_open(path = filename, mode = nf90_nowrite, ncid = ncid))
-      print *, 'This file is opened', filename
+      !print *, 'This file is opened', filename
 
       ! Get dimensions IDs (ni, nj, ncat)
       status = netcdf_check(nf90_inq_dimid(ncid, "x", niid))
@@ -389,10 +379,10 @@ CONTAINS
       status = netcdf_check(nf90_inq_varid(ncid,varname,varid)) 
       status = netcdf_check(nf90_get_var(ncid,varid,wrk))  
       status = netcdf_check(nf90_close(ncid))      
-      print *, 'This file is closed', filename
+      !print *, 'This file is closed', filename
 	  z = 1
       ! This is used to populate the sd array
-	  print *, 'writing wrk into f'
+	  !print *, 'writing wrk into f'
 	  do i = 1,jpi
          do j = 1,jpj
             f(i,j) = wrk(i,j,z,t)

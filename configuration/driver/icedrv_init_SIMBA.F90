@@ -103,32 +103,43 @@ CONTAINS
 
         ! Extract ice data (indices 90 to 108 from the profile)
         Tice = profile(90:108)
-
+        
         ! Print extracted profiles for validation
         print *, 'Snow temperature profile (80-89): ', Tsnow
         print *, 'Ice temperature profile (90-108): ', Tice
 
         ! ------------------------------------------------------
 
-         
         do ns = 1, nslyr
 	    zns = ((2d0*ns)-1)*(hs*1d2)/(2d0*nslyr)
-	    x1 = floor(zns/2d0)
+	    x1 = int(floor(zns/2d0))
 	    x2 = x1+1
-	    f1 = Tsnow(x1)
-	    f2 = Tsnow(x2)	
-	    Tns(ns) = f1 + ((zns/2d0 - x1)/(x2-x1))*(f2-f1)
-	    print *, 'interpolation of internal temp : ', zns, x1, x2, f1, f2, Tns(ns)
+
+            ! Clamp indices to valid range
+             x1 = max(1, min(SIZE(Tsnow), int(x1)))
+             x2 = max(1, min(SIZE(Tsnow), int(x2)))
+
+            f1 = Tsnow(int(x1))
+	    f2 = Tsnow(int(x2))	
+	    ! Tns(ns) = f1 + ((zns/2d0 - x1)/(x2-x1))*(f2-f1)
+            Tns(ns) = f1 + ((zns/2d0 - real(x1, kind=dbl_kind)) / real(x2 - x1, kind=dbl_kind)) * (f2 - f1)
+
+           ! print *, 'interpolation of internal temp : ', zns, x1, x2, f1, f2, Tns(ns)
 	enddo
 	
         do ni = 1, nilyr
 	    zni = ((2d0*ni)-1)*(hi*1d2)/(2d0*nilyr)
-	    x1 = floor(zni/2d0)
+	    x1 = int(floor(zni/2d0))
 	    x2 = x1+1
-	    f1 = Tice(x1)
-	    f2 = Tice(x2)	
-	    Tni(ni) = f1 + ((zni/2d0 - x1)/(x2-x1))*(f2-f1)   
-	    print *, 'interpolation of internal temp : ', zni, x1, x2, f1, f2, Tni(ni)
+           ! Clamp indices to valid range
+	   x1 = max(1, min(SIZE(Tice), int(x1)))
+           x2 = max(1, min(SIZE(Tice), int(x2))) 
+           f1 = Tice(int(x1))
+	    f2 = Tice(int(x2))	
+            Tni(ni) = f1 + ((zni/2d0 - real(x1, kind=dbl_kind)) / real(x2 - x1, kind=dbl_kind)) * (f2 - f1)
+
+            ! Tni(ni) = f1 + ((zni/2d0 - x1)/(x2-x1))*(f2-f1)   
+	  !  print *, 'interpolation of internal temp : ', zni, x1, x2, f1, f2, Tni(ni)
 	enddo
 	
 	print *, 'Tns = ', Tns

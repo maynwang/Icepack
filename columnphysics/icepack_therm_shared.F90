@@ -291,6 +291,7 @@
          Sprofile, & ! vertical salinity profile (ppt)
          Tprofile    ! vertical temperature profile (C)
 
+ 
       real (kind=dbl_kind), intent(out) :: &
          Tsfc        ! surface temperature (C)
 
@@ -360,6 +361,9 @@
                                   Tsfc,  Tni,             &
                                   nilyr,    nslyr,    &
                                   qin,      qsn)
+        
+      ! print *, "At subroutine start: qin =", qin
+      ! print *, "At subroutine start: Tni =", Tni
 
       integer (kind=int_kind), intent(in) :: &
          nilyr, &    ! number of ice layers
@@ -371,17 +375,21 @@
 
       real (kind=dbl_kind), dimension(:), intent(in) :: &
          Sprofile, & ! vertical salinity profile (ppt)
-         Tprofile, & ! vertical temperature profile (C)
-         Tni
-         
+         Tprofile ! vertical temperature profile (C)
+       !  Tni
+     real (kind=dbl_kind), dimension(nilyr) :: Tni
+    
+     real (kind=dbl_kind) &
+         T_debug        ! surface temperature (C)
+
       real (kind=dbl_kind), intent(out) :: &
          Tsfc        ! surface temperature (C)
 
       real (kind=dbl_kind), dimension(:), intent(out) :: &
          qin, &      ! ice enthalpy profile (J/m3)
          qsn         ! snow enthalpy profile (J/m3)
-
-      ! local variables
+ 
+        ! local variables
 
       integer (kind=int_kind) :: k
 
@@ -393,17 +401,14 @@
       
       if (heat_capacity) then
         ! ice enthalpy
+
         do k = 1, nilyr
           if (ktherm == 2) then
             qin(k) = enthalpy_mush(Tni(k), Sprofile(k))
           else
-          print *, 'Before qin(k)'
-          print *, qin(k), Tni(k), Tni(4)
-                
-            qin(k) = -(rhoi * (cp_ice*(Tprofile(k)-Tni(k)) &
-                + Lfresh*(c1-Tprofile(k)/Tni(k)) - cp_ocn*Tprofile(k)))
-        print *, "After else statement"
-        print *, qin(k), Tni(k), Tni(4)
+            T_debug = Tni(k)    
+            qin(k) = -(rhoi * (cp_ice*(Tprofile(k)-T_debug) &
+                + Lfresh*(c1-Tprofile(k)/T_debug) - cp_ocn*Tprofile(k)))
         endif
           
         enddo               ! nilyr

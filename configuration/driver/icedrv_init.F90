@@ -1163,7 +1163,7 @@
          ainit, hinit    ! initial area, thickness
 
       real (kind=dbl_kind), dimension(nilyr) :: &
-         qin             ! ice enthalpy (J/m3)
+         qin_debug             ! ice enthalpy (J/m3)
 
       real (kind=dbl_kind), dimension(nslyr) :: &
          qsn             ! snow enthalpy (J/m3)
@@ -1179,11 +1179,12 @@
       character(len=*), parameter :: subname='(set_state_var)'
       
       real (kind=dbl_kind), dimension(nslyr)  ::  Tns 
-      real (kind=dbl_kind), dimension(nslyr)  ::  Tni     
+      real (kind=dbl_kind), dimension(nilyr)  ::  Tni     
       
       namelist /forcing_nml/ init_SIMBA 
-      
-      
+     
+      qin_debug(:) = 0d0
+
       !-----------------------------------------------------------------
       ! query Icepack values
       !-----------------------------------------------------------------
@@ -1236,6 +1237,69 @@
       ! and land
       !-----------------------------------------------------------------
 
+
+      i = 4  ! land-fast ice slab from SIMBA buoy
+      
+      if ((init_SIMBA) .and. (nx > 4)) then      
+        
+        call get_buoy_data(nslyr, nilyr, Tair_buoy(i), hs, hi, Tns, Tni)
+        
+        if (3 <= ncat) then      
+          do n = 1, ncat
+            if ((hi > hin_max(n-1)) .and. (hi < hin_max(n))) then
+               hinit(n) = hi ! m
+               ainit(n) = c1  ! assumes we are using the default ITD boundaries
+            else 
+               ainit(n) = c0
+               hinit(n) = c0     
+            endif              
+          enddo      
+        else
+          ainit(ncat) = c1
+          hinit(ncat) = hi
+        endif
+      
+        do n = 1, ncat
+           ! ice volume, snow volume
+           aicen(i,n) = ainit(n)
+           vicen(i,n) = hinit(n) * ainit(n) ! m
+           vsnon(i,n) = hs*ainit(n) !min(aicen(i,n)*hs,p2*vicen(i,n))
+           ! tracers
+           print *, 'Going into icepack_init_trcr_SIMBA'
+           call icepack_init_trcr_SIMBA(Tair_buoy(i), Tf   (i  ), &
+                                salinz(i,:), Tmltz(i,:), &
+                                Tsfc, Tni,                   &
+                                nilyr,       nslyr,      &
+                                qin_debug   (  :), qsn  (  :))
+           ! surface temperature
+           trcrn(i,nt_Tsfc,n) = Tsfc ! deg C
+           ! ice enthalpy, salinity 
+           do k = 1, nilyr
+            trcrn(i,nt_qice+k-1,n) = qin_debug(k)
+            trcrn(i,nt_sice+k-1,n) = salinz(i,k)
+           enddo
+           ! snow enthalpy
+           do k = 1, nslyr
+              trcrn(i,nt_qsno+k-1,n) = qsn(k)
+           enddo               ! nslyr
+           ! brine fraction
+           if (tr_brine) trcrn(i,nt_fbri,n) = c1
+        enddo 
+        
+        !print *, 'Tair_buoy = ', Tair_buoy
+        !print *, 'Tf = ', Tf       
+        !print *, 'salinz = ', salinz
+        !print *, 'Tni = ', Tni    
+        !print *, 'Tsfc = ', Tsfc       
+        !print *, 'qin_init = ', qin
+        !print *, 'qsn_init = ', qsn   
+        print *, 'ldfast snow volumes are = ', vsnon(5,:)
+	print *, 'ldfast ice volumes are = ', vicen(5,n)  
+	
+      endif
+           
+
+
       i = 1  ! ice-free
              ! already initialized above 
 
@@ -1262,7 +1326,7 @@
                                 Tprofile = Tmltz(i,:),  &
                                 Tsfc     = Tsfc,        &
                                 nilyr=nilyr, nslyr=nslyr, &
-                                qin=qin(:), qsn=qsn(:))
+                                qin=qin_debug(:), qsn=qsn(:))
 
          ! floe size distribution
          if (tr_fsd) call icepack_init_fsd(nfsd=nfsd, ice_ic=ice_ic, &
@@ -1273,7 +1337,7 @@
          trcrn(i,nt_Tsfc,n) = Tsfc ! deg C
          ! ice enthalpy, salinity 
          do k = 1, nilyr
-            trcrn(i,nt_qice+k-1,n) = qin(k)
+            trcrn(i,nt_qice+k-1,n) = qin_debug(k)
             trcrn(i,nt_sice+k-1,n) = salinz(i,k)
          enddo
          ! snow enthalpy
@@ -1323,7 +1387,7 @@
                                 Tprofile = Tmltz(i,:),  &
                                 Tsfc     = Tsfc,        &
                                 nilyr=nilyr, nslyr=nslyr, &
-                                qin=qin(:), qsn=qsn(:))
+                                qin=qin_debug(:), qsn=qsn(:))
          ! floe size distribution
          if (tr_fsd) call icepack_init_fsd(nfsd=nfsd, ice_ic=ice_ic, &
                                   floe_rad_c=floe_rad_c,             &
@@ -1334,7 +1398,7 @@
          trcrn(i,nt_Tsfc,n) = Tsfc ! deg C
          ! ice enthalpy, salinity 
          do k = 1, nilyr
-            trcrn(i,nt_qice+k-1,n) = qin(k)
+            trcrn(i,nt_qice+k-1,n) = qin_debug(k)
             trcrn(i,nt_sice+k-1,n) = salinz(i,k)
          enddo
          ! snow enthalpy
@@ -1350,71 +1414,6 @@
       
        !-----------------------------------------------------------------
 
-      i = 4  ! land-fast ice slab from SIMBA buoy
-      
-      if ((init_SIMBA) .and. (nx > 4)) then      
-        call get_buoy_data(nslyr, nilyr, Tair_buoy(i), hs, hi, Tns, Tni)
-        print *, 'hs in is = ', hs     
-        print *, 'hi in is = ', hi
-        print *, 'Tni after call get_buoy_data: ', Tni(1),Tni(2),Tni(3),Tni(4)
-        if (3 <= ncat) then      
-          do n = 1, ncat
-            if ((hi > hin_max(n-1)) .and. (hi < hin_max(n))) then
-               hinit(n) = hi ! m
-               ainit(n) = c1  ! assumes we are using the default ITD boundaries
-            else 
-               ainit(n) = c0
-               hinit(n) = c0     
-            endif              
-          enddo      
-        else
-          ainit(ncat) = c1
-          hinit(ncat) = hi
-        endif
-      
-        do n = 1, ncat
-           ! ice volume, snow volume
-           aicen(i,n) = ainit(n)
-           vicen(i,n) = hinit(n) * ainit(n) ! m
-           vsnon(i,n) = hs*ainit(n) !min(aicen(i,n)*hs,p2*vicen(i,n))
-           ! tracers
-           print *, qin(:), Tni(:)
-           print *, 'ntqice: ', nt_qice
-           print *, 'Going into icepack_init_trcr_SIMBA'
-           STOP
-           call icepack_init_trcr_SIMBA(Tair_buoy(i), Tf   (i  ), &
-                                salinz(i,:), Tmltz(i,:), &
-                                Tsfc, Tni,                   &
-                                nilyr,       nslyr,      &
-                                qin   (  :), qsn  (  :))
-           ! surface temperature
-           trcrn(i,nt_Tsfc,n) = Tsfc ! deg C
-           ! ice enthalpy, salinity 
-           do k = 1, nilyr
-            trcrn(i,nt_qice+k-1,n) = qin(k)
-            trcrn(i,nt_sice+k-1,n) = salinz(i,k)
-           enddo
-           ! snow enthalpy
-           do k = 1, nslyr
-              trcrn(i,nt_qsno+k-1,n) = qsn(k)
-           enddo               ! nslyr
-           ! brine fraction
-           if (tr_brine) trcrn(i,nt_fbri,n) = c1
-        enddo 
-        
-        !print *, 'Tair_buoy = ', Tair_buoy
-        !print *, 'Tf = ', Tf       
-        !print *, 'salinz = ', salinz
-        !print *, 'Tni = ', Tni    
-        !print *, 'Tsfc = ', Tsfc       
-        !print *, 'qin_init = ', qin
-        !print *, 'qsn_init = ', qsn   
-        !print *, 'ldfast snow volumes are = ', vsnon(5,:)
-	!print *, 'ldfast ice volumes are = ', vicen(5,n)  
-	
-      endif
-           
-      STOP
 
       !-----------------------------------------------------------------
       
