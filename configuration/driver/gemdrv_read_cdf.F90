@@ -127,7 +127,7 @@ CONTAINS
           
       dayfrac = dble(kt_sbc)*max(dt,3600.0)*rsid 
       call incdatsd  (datev,Mod_runstrt_S,dayfrac)
-      print *, 'datev, Mod_runstrt_S, dayfrac :', datev, Mod_runstrt_S, dayfrac
+      ! print *, 'datev, Mod_runstrt_S, dayfrac :', datev, Mod_runstrt_S, dayfrac
       if (datev.gt.current_atmf) then
       print *, 'Changing the forcing data'
       
@@ -139,7 +139,7 @@ CONTAINS
       !endif      
          dayfrac = dble(dt_gem_atm)*rsid 
          call incdatsd (daten,current_atmf,dayfrac)
-           print *, 'Going into atm_get_data, datev : ', datev     
+           ! print *, 'Going into atm_get_data, datev : ', datev     
          call atm_getdata_cdf (GEM_cdf_list,daten,.true.,.true.,sd)
       endif
       call prsdate   (yy,mo,dd,hh,mm,ss,dum,datev,1)
@@ -225,8 +225,8 @@ CONTAINS
       call prsdate   (yy,mo,dd,hh,mm,ss,dum,datev,1)      
 
       ktgem =hh + 1
-      print *, 'Finding the time level: ', hh, dt_gem_atm, ktgem
-      print *, 'starting to write the cdf into arrays, at time level ', ktgem
+      ! print *, 'Finding the time level: ', hh, dt_gem_atm, ktgem
+      ! print *, 'starting to write the cdf into arrays, at time level ', ktgem
 
       !Get a string with format YYYMMDD00      
       write(date00(1:10),10) yy,mo,dd
@@ -341,65 +341,73 @@ CONTAINS
       
       END SUBROUTINE atm_read_cdf
 
+  FUNCTION netcdf_check(status, ncid) RESULT(ret)
+    INTEGER, INTENT(in) :: status
+    INTEGER, INTENT(in) :: ncid
+    INTEGER :: ret
+    INTEGER :: close_status
+
+    ret = NF90_NOERR
+
+    IF (status /= NF90_NOERR) THEN
+      PRINT *, 'NetCDF Error: ', trim(nf90_strerror(status))
+      IF (ncid /= -1) THEN
+        close_status = nf90_close(ncid)
+        IF (close_status /= NF90_NOERR) THEN
+          PRINT *, 'Error while closing file:', trim(nf90_strerror(close_status))
+        ELSE
+          PRINT *, 'File closed due to error.'
+        END IF
+      END IF
+      CALL exit(1)
+    END IF
+
+    RETURN
+  END FUNCTION netcdf_check   
       
-      
-      
-      SUBROUTINE readatm_fromCDF (f,jpi,jpj,t,varname,filename,dat,factm,facta)
+    SUBROUTINE readatm_fromCDF(f, jpi, jpj, t, varname, filename, dat, factm, facta)
+   
+    IMPLICIT NONE 
 
-      implicit none
+    CHARACTER(*) varname, filename, dat
+    integer jpi, jpj
+    real factm, facta
+    REAL(wp), DIMENSION(jpi,jpj) :: f
+    real(wp), DIMENSION(jpi,jpj,jpz,jpt) :: wrk
 
-      character*(*) varname,filename,dat
-      integer jpi,jpj
-      real factm,facta
-      REAL(wp) , DIMENSION(jpi,jpj) :: f
-      real(wp) , DIMENSION(jpi,jpj,jpz,jpt) :: wrk
+    INTEGER :: i, j, z, t
+    INTEGER :: ncid, niid, njid, nzid, ntid, varid    ! IDs for netcdf file, dimensions, layer variable
+    INTEGER :: status ! Variable for netcdf subroutine status
 
-      integer i,j,z,t
-      integer ncid, niid, njid, nzid, ntid, varid       ! IDs for netcdf file, dimensions, layer variable
-      INTEGER :: status                             ! Variable for netcdf subroutine status
+    PRINT *, 'Getting into CDF files for ', dat, t, filename, varname
+
+    status = netcdf_check(nf90_open(path = filename, mode = nf90_nowrite, ncid = ncid), -1)
+    status = netcdf_check(nf90_inq_dimid(ncid, "x", niid), ncid)
+    status = netcdf_check(nf90_inq_dimid(ncid, "y", njid), ncid)
+    status = netcdf_check(nf90_inq_dimid(ncid, "z", nzid), ncid)
+    status = netcdf_check(nf90_inq_dimid(ncid, "time_counter", ntid), ncid)
+
+    status = netcdf_check(nf90_inquire_dimension(ncid, niid, len = jpi), ncid)
+    status = netcdf_check(nf90_inquire_dimension(ncid, njid, len = jpj), ncid)
+    status = netcdf_check(nf90_inquire_dimension(ncid, nzid, len = jpz), ncid)
+    status = netcdf_check(nf90_inquire_dimension(ncid, ntid, len = jpt), ncid)
+
+    status = netcdf_check(nf90_inq_varid(ncid, varname, varid), ncid)
+    status = netcdf_check(nf90_get_var(ncid, varid, wrk), ncid)
+    status = netcdf_check(nf90_close(ncid), ncid)
+
+    z = 1
+    DO i = 1, jpi
+      DO j = 1, jpj
+        f(i, j) = wrk(i, j, z, t)
+      END DO
+    END DO
+
+    f = f * factm + facta
+  END SUBROUTINE readatm_fromCDF
 
 
-      print *, 'Getting into CDF files for ', dat, t, filename, varname
-
-      status = netcdf_check(nf90_open(path = filename, mode = nf90_nowrite, ncid = ncid))
-      !print *, 'This file is opened', filename
-
-      ! Get dimensions IDs (ni, nj, ncat)
-      status = netcdf_check(nf90_inq_dimid(ncid, "x", niid))
-      status = netcdf_check(nf90_inq_dimid(ncid, "y", njid))
-      status = netcdf_check(nf90_inq_dimid(ncid, "z", nzid))
-      status = netcdf_check(nf90_inq_dimid(ncid, "time_counter", ntid))
-
-      ! Get dimensions values
-      status = netcdf_check(nf90_inquire_dimension(ncid, niid, len = jpi))
-      status = netcdf_check(nf90_inquire_dimension(ncid, njid, len = jpj))
-      status = netcdf_check(nf90_inquire_dimension(ncid, nzid, len = jpz))
-      status = netcdf_check(nf90_inquire_dimension(ncid, ntid, len = jpt))
-      !Get the data
-      status = netcdf_check(nf90_inq_varid(ncid,varname,varid)) 
-      status = netcdf_check(nf90_get_var(ncid,varid,wrk))  
-      status = netcdf_check(nf90_close(ncid))      
-      !print *, 'This file is closed', filename
-	  z = 1
-      ! This is used to populate the sd array
-	  !print *, 'writing wrk into f'
-	  do i = 1,jpi
-         do j = 1,jpj
-            f(i,j) = wrk(i,j,z,t)
-         enddo
-      enddo
-        
-      f   = f*factm + facta
-
-      return
-      END SUBROUTINE readatm_fromCDF
-
-      
-      
-      
-      
-      SUBROUTINE readlatlon(f,jpi,jpj,varname,filename)
-
+  SUBROUTINE readlatlon(f, jpi, jpj, varname, filename)
       implicit none
 
       character*(*) varname,filename
@@ -410,78 +418,42 @@ CONTAINS
       integer i,j
       integer ncid, niid, njid, nzid, ntid, varid       ! IDs for netcdf file, dimensions, layer variable
       INTEGER :: status                             ! Variable for netcdf subroutine status
+    
+    status = netcdf_check(nf90_open(path = filename, mode = nf90_nowrite, ncid = ncid), -1)
+    status = netcdf_check(nf90_inq_dimid(ncid, "x", niid), ncid)
+    status = netcdf_check(nf90_inq_dimid(ncid, "y", njid), ncid)
+    status = netcdf_check(nf90_inquire_dimension(ncid, niid, len = jpi), ncid)
+    status = netcdf_check(nf90_inquire_dimension(ncid, njid, len = jpj), ncid)
+    status = netcdf_check(nf90_inq_varid(ncid, varname, varid), ncid)
+    status = netcdf_check(nf90_get_var(ncid, varid, wrk), ncid)
+    status = netcdf_check(nf90_close(ncid), ncid)
 
-      status = netcdf_check(nf90_open(path = filename, mode = nf90_nowrite, ncid = ncid))
-
-      ! Get dimensions IDs (ni, nj, ncat)
-      status = netcdf_check(nf90_inq_dimid(ncid, "x", niid))
-      status = netcdf_check(nf90_inq_dimid(ncid, "y", njid))
-
-      ! Get dimensions values
-      status = netcdf_check(nf90_inquire_dimension(ncid, niid, len = jpi))
-      status = netcdf_check(nf90_inquire_dimension(ncid, njid, len = jpj))
-      !Get the data
-      status = netcdf_check(nf90_inq_varid(ncid,varname,varid)) 
-      status = netcdf_check(nf90_get_var(ncid,varid,wrk))  
-      status = netcdf_check(nf90_close(ncid))    
-      ! This is used to populate the sd array
-	  do i = 1,jpi
-         do j = 1,jpj
-            f(i,j) = wrk(i,j)
-         enddo
-      enddo
-
-      return
-      END SUBROUTINE readlatlon
+    DO i = 1, jpi
+      DO j = 1, jpj
+        f(i, j) = wrk(i, j)
+      END DO
+    END DO
+  END SUBROUTINE readlatlon
 
 
+  SUBROUTINE update_variable_dimensions(filename)
+    IMPLICIT NONE
+    CHARACTER(*), INTENT(in) :: filename
+    INTEGER :: jpi, jpj, jpz, jpt
+    INTEGER :: ncid, niid, njid, nzid, ntid
+    INTEGER :: status
 
+    status = netcdf_check(nf90_open(path = filename, mode = nf90_nowrite, ncid = ncid), -1)
+    status = netcdf_check(nf90_inq_dimid(ncid, "x", niid), ncid)
+    status = netcdf_check(nf90_inq_dimid(ncid, "y", njid), ncid)
+    status = netcdf_check(nf90_inq_dimid(ncid, "z", nzid), ncid)
+    status = netcdf_check(nf90_inq_dimid(ncid, "time_counter", ntid), ncid)
 
-
-      SUBROUTINE update_variable_dimensions(filename)
-
-      implicit none
-
-      character*(*) filename
-      integer jpi,jpj,jpz,jpt
-      integer ncid, niid, njid, nzid, ntid, varid       ! IDs for netcdf file, dimensions, layer variable
-      INTEGER :: status                             ! Variable for netcdf subroutine status
-
-      status = netcdf_check(nf90_open(path = filename, mode = nf90_nowrite, ncid = ncid))
-
-      ! Get dimensions IDs (ni, nj, ncat)
-      status = netcdf_check(nf90_inq_dimid(ncid, "x", niid))
-      status = netcdf_check(nf90_inq_dimid(ncid, "y", njid))
-      status = netcdf_check(nf90_inq_dimid(ncid, "z", nzid))
-      status = netcdf_check(nf90_inq_dimid(ncid, "time_counter", ntid))
-
-      ! Get dimensions values
-      status = netcdf_check(nf90_inquire_dimension(ncid, niid, len = jpi))
-      status = netcdf_check(nf90_inquire_dimension(ncid, njid, len = jpj))
-      status = netcdf_check(nf90_inquire_dimension(ncid, nzid, len = jpz))
-      status = netcdf_check(nf90_inquire_dimension(ncid, ntid, len = jpt))
-
-      return
-      END SUBROUTINE update_variable_dimensions
-
-
-    FUNCTION netcdf_check(status) result(ret)
-
-      INTEGER, INTENT (in) :: status
-      INTEGER :: ret
-
-      ret = NF90_NOERR
-
-      if(status /= NF90_NOERR) then
-        print *, trim(nf90_strerror(status))
-        call exit(1)
-      end if
-
-      return
-
-    END FUNCTION netcdf_check
-
-
-   !!==============================================================================
+    status = netcdf_check(nf90_inquire_dimension(ncid, niid, len = jpi), ncid)
+    status = netcdf_check(nf90_inquire_dimension(ncid, njid, len = jpj), ncid)
+    status = netcdf_check(nf90_inquire_dimension(ncid, nzid, len = jpz), ncid)
+    status = netcdf_check(nf90_inquire_dimension(ncid, ntid, len = jpt), ncid)
+    status = netcdf_check(nf90_close(ncid), ncid)
+  END SUBROUTINE update_variable_dimensions
 
 END MODULE gemdrv_read_cdf

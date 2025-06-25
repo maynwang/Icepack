@@ -39,15 +39,15 @@ CONTAINS
 
       call pdfjdate(jolddate,oldyy,oldmo,olddd,oldhh,oldmm,oldss)
       jnewdate=jolddate+dt
-      print *, 'jnewdate: ', jnewdate
-      print *, 'joldate: ', jolddate
-      print *, 'dt: ', dt
-      print *, 'prsdate vars: ', oldyy,oldmo,olddd,oldhh,oldmm,oldss,oldsign  
-      print *, 'jolddate: ', jolddate
+      !print *, 'jnewdate: ', jnewdate
+      !print *, 'joldate: ', jolddate
+      !print *, 'dt: ', dt
+      !print *, 'prsdate vars: ', oldyy,oldmo,olddd,oldhh,oldmm,oldss,oldsign  
+      !print *, 'jolddate: ', jolddate
       call pdfcdate(newyy,newmo,newdd,newhh,newmm,newss,jnewdate)
-      print *, 'pdfcdate outputs: ',newyy,newmo,newdd,newhh,newmm,newss,jnewdate
+      !print *, 'pdfcdate outputs: ',newyy,newmo,newdd,newhh,newmm,newss,jnewdate
       write(newdate,12) newyy,newmo,newdd,newhh,newmm,newss
-      print *, 'newdate: ', newdate
+      !print *, 'NEWDATE: ', newdate
  12   format(i4.4,i2.2,i2.2,'.',i2.2,i2.2,i2.2)
       return
 

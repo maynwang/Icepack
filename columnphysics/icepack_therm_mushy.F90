@@ -3294,7 +3294,7 @@ contains
        ! check if have flooded ice
        if (freeboard_density > c0) then
           !Porosity threshold for snow flooding. 0d0 if no threshold.  
-          if (phi_min > 0.005d0) then 
+          if (phi_min > 0d0) then 
               ! sea ice fraction of newly formed snow ice
               phi_snowice = (c1 - rhos / rhoi)
 

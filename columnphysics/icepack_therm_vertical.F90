@@ -1199,6 +1199,7 @@
       !Uncomment the following to manually set the flooding onset to a 
       !Specific date
       !if (yday .ge. 110d0) tr_snowice = .True.
+      ! change 110 to the day ofo year when flooding occurs 
 
       !-----------------------------------------------------------------
       ! Initialize
