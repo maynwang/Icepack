@@ -254,10 +254,10 @@
          swidr(:) = c1intp * swidr_data(mlast) + c2intp * swidr_data(mnext)
          swidf(:) = c1intp * swidf_data(mlast) + c2intp * swidf_data(mnext)
 
-         print *, 'Tair: ', Tair(:)
-         print *, 'potT ', potT(:)
-         print *, 'zlvl:', zlvl(:)
-         print *, 'zlvs:', zlvs(:)
+         ! print *, 'Tair icedrv_forcing: ', Tair(:)
+         !print *, 'potT ', potT(:)
+         !print *, 'zlvl:', zlvl(:)
+         !print *, 'zlvs:', zlvs(:)
 
       elseif (trim(atm_data_type) == 'clim') then
          midmonth = 15  ! assume data is given on 15th of every month
@@ -422,25 +422,28 @@
          swvdf(:) = c1intp * swvdf_data(mlast) + c2intp * swvdf_data(mnext)
          swidr(:) = c1intp * swidr_data(mlast) + c2intp * swidr_data(mnext)
          swidf(:) = c1intp * swidf_data(mlast) + c2intp * swidf_data(mnext)
-         print *, "Tair is : ", Tair(:)
-         print *, "Qa is : ", Qa(:)
-         print *, "uatm is : ", uatm(:)
-         print *, "vatm is : ", vatm(:)
-         print *, "fsnow is : ", fsnow(:)
-         print *, "flw is : ", flw(:)
-         print *, "fsw is : ", fsw(:)
-         print *, "zlvl is : ", zlvl(:)
-         print *, "zlvs is : ", zlvs(:)
-         print *, "potT is : ", potT(:)
-         print *, "wind is : ", wind(:)
-         print *, "strax is : ", strax(:)
-         print *, "stray is : ", stray(:)
-         print *, "rhoa is : ", rhoa(:)
-         print *, "frain is : ", frain(:)
-         print *, "swvdr is : ", swvdr(:)
-         print *, "swvdf is : ", swvdf(:)
-         print *, "swidr is : ", swidr(:)
-         print *, "swidf is : ", swidf(:)
+         print *, 'Timestep i: ', i 
+         print *, 'Tair icedrv_forcing: ', Tair(:)
+         print *, 'mlast, mnext, c1intp *  Tair_data(mlast) + c2intp *  Tair_data(mnext): ', mlast, mnext, c1intp, Tair_data(mlast), c2intp, Tair_data(mnext)
+         !print *, "Tair is : ", Tair(:)
+         !print *, "Qa is : ", Qa(:)
+!         print *, "uatm is : ", uatm(:)
+!         print *, "vatm is : ", vatm(:)
+!         print *, "fsnow is : ", fsnow(:)
+!         print *, "flw is : ", flw(:)
+!         print *, "fsw is : ", fsw(:)
+!         print *, "zlvl is : ", zlvl(:)
+!         print *, "zlvs is : ", zlvs(:)
+!         print *, "potT is : ", potT(:)
+!         print *, "wind is : ", wind(:)
+!         print *, "strax is : ", strax(:)
+!         print *, "stray is : ", stray(:)
+!         print *, "rhoa is : ", rhoa(:)
+!         print *, "frain is : ", frain(:)
+!         print *, "swvdr is : ", swvdr(:)
+!         print *, "swvdf is : ", swvdf(:)
+!         print *, "swidr is : ", swidr(:)
+!         print *, "swidf is : ", swidf(:)
          
       endif
 
@@ -1053,14 +1056,17 @@
       !It is used by fnom to load the forcing data.
       GEM_data_file = 'GEM_atm_forcing'
       GEM_rpn_list = trim(data_dir)//'/GEM/'//trim(GEM_data_file)
-      print *, npt, idate0, dt
+      print *, "npt, idate0, dt: ", npt, idate0, dt
       if (dt .lt. 3600) then
           nptgem = npt*dt/3600
       else
           nptgem = npt    
       endif
-      print *, nptgem
-     
+      !print *, nptgem
+    
+      print *, 'Printing idate0, nptgem, lat_buoy, lon_buoy: ', idate0,&
+              nptgem, lat_buoy, lon_buoy
+
       call prepare_gem_forcing(idate0,nptgem,lat_buoy,lon_buoy,GEM_rpn_list)
        
       do i = 1, nptgem
@@ -1083,8 +1089,13 @@
          swidf_data(i) = swidf_col(i)    ! sw down, near IR, diffuse (W/m^2)
            flw_data(i) = flw_col  (i)    ! incoming longwave radiation (W/m^2)
          frain_data(i) = frain_col(i)    ! rainfall rate (kg/m^2 s)
-         
-      enddo 
+      
+      print *, 'icedrv_forcing, L1091: Tair_data(i), zlvl_data(i), zlvs_data(i): ', &
+            Tair_data(i), zlvl_Data(i), zlvs_data(i)
+
+        enddo 
+
+
 
       
       end subroutine atm_GEM

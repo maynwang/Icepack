@@ -148,12 +148,12 @@ CONTAINS
 !      print *, 'sample wind : ', wind_rpn(50,50)
 !      print *, 'sample fsw : ', fsw_rpn(50,50)
 !      print *, 'sample flw : ', flw_rpn(50,50)
-!      print *, 'sample Tair : ', Tair_rpn(50,50)
-!      print *, 'sample potT : ', potT_rpn(50,50)
+      print *, 'sample Tair : ', Tair_rpn(1503, 1008)
+      print *, 'sample potT : ', potT_rpn(1503, 1008)
 !      print *, 'sample rhoa : ', rhoa_rpn(50,50)
 !      print *, 'sample Qa : ', Qa_rpn(50,50)
-      print *, 'sample zlvl : ', zlvl_rpn(50,50)
-      print *, 'sample zlvs : ', zlvt_rpn(50,50)
+      print *, 'sample zlvl : ', zlvl_rpn(1503, 1008)
+      print *, 'sample zlvs : ', zlvt_rpn(1503, 1008)
 !      print *, 'sample swvdr : ', swvdr_rpn(50,50)
 !      print *, 'sample swvdf : ', swvdf_rpn(50,50)
 !      print *, 'sample swidr : ', swidr_rpn(50,50)
@@ -173,8 +173,8 @@ CONTAINS
       INTEGER  ::   ierror      ! return error code
   
 	print *, 'Allocating the column forcing vectors'      
-        print *, 'ktmax : ', ktmax
-        print *, 'zlvl_col',zlvl_col
+        !print *, 'ktmax : ', ktmax
+        !print *, 'zlvl_col',zlvl_col
 
          ALLOCATE( zlvl_col(ktmax),  STAT=ierror )         ! set sf structure
          ALLOCATE( zlvt_col(ktmax),  STAT=ierror )
@@ -230,7 +230,7 @@ CONTAINS
         !print *, 'sample wind : ', wind_col(kt)
         !print *, 'sample fsw : ', fsw_col(kt)
         !print *, 'sample flw : ', flw_col(kt)
-        !print *, 'sample Tair : ', Tair_col(kt)
+        print *, 'sample Tair_col(kt) : ', Tair_col(kt)
         !print *, 'sample rhoa : ', rhoa_col(kt)
         !print *, 'sample Qa : ', Qa_col(kt)
         !print *, 'sample zlvl : ', zlvl_col(kt)

@@ -50,7 +50,7 @@ MODULE gemdrv_read_rpn
    END TYPE FLD  
    
    REAL(wp), PUBLIC, SAVE ::   &
-                 zlev_gem   = -9.       !: optional fixed forcing level from namelist
+                 zlev_gem   = 2       !: optional fixed forcing level from namelist
                                         !: allow to skip reading of PX,P0
                                         !: do nothing if left to -9.
   

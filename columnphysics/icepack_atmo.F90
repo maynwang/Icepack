@@ -414,7 +414,7 @@
        endif
       endif
       
-      !print *, "Printing hols and Tref: ", hols,potT, Tref, delt,fac, zTrf, zlvl
+      print *, "Printing hols, potT, Tref, delt, fac, zTrf, zlvl: ", hols,potT, Tref, delt,fac, zTrf, zlvl
       !stop
 
       end subroutine atmo_boundary_layer

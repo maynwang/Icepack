@@ -85,7 +85,7 @@ CONTAINS
       chh=tmpdate(10:11)
       cmm=tmpdate(12:13)
       css=tmpdate(14:15)
-PRINT *, "Reading value from input file...date = ", date
+! PRINT *, "Reading value from input file...date = ", date
       read(cyy,'(I4)') yy
       read(cmo,'(I2)') mo
       read(cdd,'(I2)') dd
@@ -168,6 +168,8 @@ PRINT *, "Reading value from input file...date = ", date
       real*8 jdate
       integer yyyy,mo,dd,hh,mm,ss,seconds
       real*8 :: f,rj
+      integer :: idoy
+      integer, dimension(12) :: mdays
 !--------------------------------------------------------------------
 
       rj = int(jdate)
@@ -194,32 +196,43 @@ PRINT *, "Reading value from input file...date = ", date
 
       yyyy = 2024
 
-      if (rj - 2460310 .lt. 32) then
+!      if (rj - 2460310 .lt. 32) then
+!          mo = 01
+!          dd = rj - 2460310
+!
+!      elseif (rj - 2460310 .lt. 61) then
+!          mo = 02
+!          dd = rj - 2460310 - 31
+!
+!      elseif (rj - 2460310 .lt. 92) then
+!          mo = 03
+!          dd = rj - 2460310 - 31-29
+!
+!      elseif (rj - 2460310 .lt. 122) then
+!          mo = 04
+!          dd = rj - 2460310 - 31-29-30
+!          if (dd > 30) dd = 30 ! clamp last day of April 
+!
+!      elseif (rj - 2460310 .lt. 153) then
+!          mo = 05
+!          dd = rj - 2460310 - 31-29-30-31
+!
+!      elseif (rj - 2460310 .lt. 183) then
+!          mo = 06
+!          dd = rj - 2460310 - 31-29-30-31-30
+!      endif
 
-          mo = 01
-
-          dd = rj - 2460310
-
-      elseif (rj - 2460310 .lt. 61) then
-
-          mo = 02
-
-          dd = rj - 2460310 - 31
-
-      elseif (rj - 2460310 .lt. 92) then
-
-          mo = 03
-
-          dd = rj - 2460310 - 31-29
-
-      elseif (rj - 2460310 .lt. 122) then
-
-          mo = 04
-
-          dd = rj - 2460310 - 31-29-30
-
-      endif
-
+! Days per month (Feb = 29 for leap year)
+	mdays = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+	
+	idoy = rj - 2460310
+	
+	mo = 1
+	do while (idoy > mdays(mo))
+	    idoy = idoy - mdays(mo)
+	    mo = mo + 1
+	end do
+	dd = idoy
 
       return
 

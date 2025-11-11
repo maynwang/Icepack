@@ -138,6 +138,7 @@
       do n = 1, nx
         !call print_state('Printing state',n)
         pTair = Tair(n) - Tffresh ! air temperature
+        print *, 'icedrv_diags L141: pTair, Tair(n), Tffresh: ', pTair, Tair(n), Tffresh
         pfsnow = fsnow(n)*dt/rhos ! snowfall
         pfrain = frain(n)*dt/rhow ! rainfall
         
@@ -164,6 +165,7 @@
         endif
         if (vice(n) /= c0) psalt = work2(n)/vice(n)
         pTair = Tref(n)- Tffresh 
+        print *, 'icedrv_diags L168: pTair, Tref(n): ', pTair, Tref(n)
         pTsfc = trcr(n,nt_Tsfc)   ! ice/snow sfc temperature
         pevap = evap(n)*dt/rhoi   ! sublimation/condensation
         pdhi(n) = vice(n) - pdhi(n)  ! ice thickness change
@@ -754,7 +756,7 @@
 	hsn    = vsnon / aicen
 	hilyr    = hin / real(nilyr,kind=dbl_kind)
 	hslyr    = hsn / rnslyr
-	    print *, 'hin, hsn, nilyr : ', hin, hsn, nilyr
+	    !print *, 'hin, hsn, nilyr : ', hin, hsn, nilyr
       !-----------------------------------------------------------------
       ! Snow enthalpy and maximum allowed snow temperature
       ! If heat_capacity = F, zqsn and zTsn are used only for checking
@@ -762,7 +764,7 @@
       !-----------------------------------------------------------------
 
 	do k = 1, nslyr
-	    print *, 'zqsn, rho, Lfresh : ', zqsn(k), rhos, Lfresh
+	    !print *, 'zqsn, rho, Lfresh : ', zqsn(k), rhos, Lfresh
       !-----------------------------------------------------------------
       ! Tmax based on the idea that dT ~ dq / (rhos*cp_ice)
       !                             dq ~ q dv / v
@@ -880,7 +882,7 @@
 	  else
             zTin(k) = calculate_Tin_from_qin(zqin(k),Tmlts(k))
             zqin_out(k) = zqin(k)
-            print *, 'Enthalpy out', zqin(k)
+            !print *, 'Enthalpy out', zqin(k)
 	  endif
 
 	  if (l_brine) then

@@ -102,10 +102,10 @@ CONTAINS
       call prsdate   (yy,mo,dd,hh,mm,ss,dum,datev,1) !from date string to yy,mm,etc
       call pdfjdate2 (tforc_2,yy,mo,dd,hh,mm,ss) ! get current time (sec) into tforc_2
       ! Now we retrieve the first forcing data
-      print *, 'Going into (initial) atm_get_data, datev, dayfrac : ', datev, dayfrac, dt
+      !print *, 'Going into (initial) atm_get_data, datev, dayfrac : ', datev, dayfrac, dt
       call atm_getdata_cdf(GEM_cdf_list,datev,.false.,.true.,sd) ! get the date for current time (datev)
       
-      print *, 'end atm_getdata initial'
+      !print *, 'end atm_getdata initial'
 
       return
       END SUBROUTINE init_atm_cdf
@@ -129,7 +129,7 @@ CONTAINS
       call incdatsd  (datev,Mod_runstrt_S,dayfrac)
       ! print *, 'datev, Mod_runstrt_S, dayfrac :', datev, Mod_runstrt_S, dayfrac
       if (datev.gt.current_atmf) then
-      print *, 'Changing the forcing data'
+      !print *, 'Changing the forcing data'
       
       call prsdate   (yy,mo,dd,hh,mm,ss,dum,datev,1)      
       !if (yy < 2011)  then 
@@ -146,6 +146,7 @@ CONTAINS
       call pdfjdate2 (tx,yy,mo,dd,hh,mm,ss)
       
       if (ln_gem_intrp) then
+        print *, 'interpolating between times ', tforc_1, tforc_2
         b=(tx-tforc_1)/(tforc_2-tforc_1)
 ! Using averaged fields with date stamp corresponding to the end of
 ! the average serie
@@ -153,7 +154,7 @@ CONTAINS
         b=1.
       endif
 
-      print *, 'interpolating with b = ', b
+      !print *, 'interpolating with b = ', b
       DO jf = 1, SIZE( sd )
         call inter_field3 (b,sd(jf)%fdta(:,:,1,1), &
                              sd(jf)%fdta(:,:,1,2), &
@@ -225,8 +226,8 @@ CONTAINS
       call prsdate   (yy,mo,dd,hh,mm,ss,dum,datev,1)      
 
       ktgem =hh + 1
-      ! print *, 'Finding the time level: ', hh, dt_gem_atm, ktgem
-      ! print *, 'starting to write the cdf into arrays, at time level ', ktgem
+      print *, 'Finding the time level: ', hh, dt_gem_atm, ktgem
+      print *, 'starting to write the cdf into arrays, at time level ', ktgem
 
       !Get a string with format YYYMMDD00      
       write(date00(1:10),10) yy,mo,dd
@@ -257,7 +258,7 @@ CONTAINS
       filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_qsw.nc'
       call readatm_fromCDF ( sd(4)%fdta (:,:,1,2),jpi,jpj,ktgem,'solar'  ,filename,datev,1.0  ,0.)
 	  !print *, 'FB sample : ', sd(4)%fdta(50,50,1,2)
-	  
+
       !Get the netcdf file for the long-wave radiations
       filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_qlw.nc'
       call readatm_fromCDF ( sd(5)%fdta (:,:,1,2),jpi,jpj,ktgem,'therm_rad'  ,filename,datev,1.0  ,0.)
@@ -266,7 +267,7 @@ CONTAINS
       !Get the netcdf file for the air temperature
       filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_t2.nc'
       call readatm_fromCDF ( sd(6)%fdta (:,:,1,2),jpi,jpj,ktgem,'tair'  ,filename,datev,1.0,0.)
-	  !print *, 'TT sample : ', sd(6)%fdta(50,50,1,2)
+	  print *, 'TT sample : ', sd(6)%fdta(1503,1008,1,2)
 
       !Get the netcdf file for the precipitations
       filename = trim(GEM_cdf_list)//'/'//trim(year)//'/'//trim(date00)//'/'//trim(date00)//'_precip.nc'
@@ -274,7 +275,7 @@ CONTAINS
 	  ! print *, 'PR sample : ', sd(7)%fdta(50,50,1,2) 
           !print *, 'filename: ', filename
           
-      !print *, 'zlev_gem :', zlev_gem
+      print *, 'zlev_gem :', zlev_gem
       !Getting the sea level pressure
       if (zlev_gem.lt.0.) then
           !lev_wrk(:) = nivt
@@ -379,7 +380,7 @@ CONTAINS
     INTEGER :: ncid, niid, njid, nzid, ntid, varid    ! IDs for netcdf file, dimensions, layer variable
     INTEGER :: status ! Variable for netcdf subroutine status
 
-    PRINT *, 'Getting into CDF files for ', dat, t, filename, varname
+    !PRINT *, 'Getting into CDF files for ', dat, t, filename, varname
 
     status = netcdf_check(nf90_open(path = filename, mode = nf90_nowrite, ncid = ncid), -1)
     status = netcdf_check(nf90_inq_dimid(ncid, "x", niid), ncid)

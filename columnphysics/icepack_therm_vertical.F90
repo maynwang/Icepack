@@ -248,7 +248,7 @@
       character(len=*),parameter :: subname='(thermo_vertical)'
 
 
-      print *, "In thermo vertical"
+      !print *, "In thermo vertical"
 
 
       !-----------------------------------------------------------------
@@ -287,11 +287,11 @@
       ! Compute variables needed for vertical thermo calculation
       !-----------------------------------------------------------------
 
-      print *, "h before init_vertical_profile: ", hin, hsn, aicen, vicen, vsnon
+      !print *, "h before init_vertical_profile: ", hin, hsn, aicen, vicen, vsnon
 
-      print *, "zT before init_vertical_profile: ", zTin, zTsn
+      !print *, "zT before init_vertical_profile: ", zTin, zTsn
 
-      print *, "zS before init_vertical_profile: ", zSin, einit
+      !print *, "zS before init_vertical_profile: ", zSin, einit
 
       call init_vertical_profile (nilyr,    nslyr,   &
                                   aicen,             &
@@ -304,11 +304,11 @@
                                   einit )
 
 
-      print *, "h After init_vertical_profile: ", hin, hsn, aicen, vicen, vsnon
+      !print *, "h After init_vertical_profile: ", hin, hsn, aicen, vicen, vsnon
 
-      print *, "zT After init_vertical_profile: ", zTin, zTsn
+      !print *, "zT After init_vertical_profile: ", zTin, zTsn
 
-      print *, "zS After init_vertical_profile: ", zSin, einit
+      !print *, "zS After init_vertical_profile: ", zSin, einit
 
 
       if (icepack_warnings_aborted(subname)) return
@@ -1689,8 +1689,8 @@
       endif
 
 
-      print *, qbotm, qbotp, qbot0
-      print *, fhocnn, emlt_ocn,hqtot
+      !print *, qbotm, qbotp, qbot0
+      !print *, fhocnn, emlt_ocn,hqtot
       !stop
 
       ! melt water is no longer zero enthalpy with ktherm=2
