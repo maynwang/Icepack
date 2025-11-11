@@ -521,6 +521,8 @@
                   dTsf = -Tsf_start
                   if (l_brine) avg_Tsi = c1   ! avg with starting temp
                   converged = .false.
+                  print *, 'Not converged, condition 1'
+                  print *, 'Tsf, puny, l_brine, avg_Tsi, dTsf: ', Tsf, puny, l_brine, avg_Tsi, dTsf
 
       !-----------------------------------------------------------------
       ! Condition 2: check for oscillating Tsf
@@ -539,6 +541,8 @@
                   endif
                   dTsf = p5 * dTsf
                   converged = .false.
+                  print *, 'Not converged, condition 2'
+                  print *, 'Tsf_start, puny, avg_Tsf, avg_Tsi, dTsf, dTsf_prev, p5: ', Tsf_start, puny, avg_Tsf, avg_Tsi, dTsf,dTsf_prev, p5
                endif
 
 !!!            dTsf_prev = dTsf
@@ -620,7 +624,10 @@
                      if (l_brine) avg_Tsi = c1
                      dTi1 = p5 * dTi1
                      converged = .false.
-                  endif
+                     print *, 'Not converged, condition 2b'
+                     print *, 'avg_Tsi, zTin(k), dTi1, puny: ', avg_Tsi, zTin(k), dTi1, puny   
+               endif
+    
                   dTi1_prev = dTi1
                endif   ! k = 1 .and. calc_Tsfc = F
 
@@ -656,6 +663,8 @@
                
                if (abs(dTsf) > Tsf_errmax) then
                   converged = .false.
+                  print *, 'Not converged, condition 3'
+                  print *, 'abs(dTsf), Tsf_errmax: ', abs(dTsf), Tsf_errmax
                endif
 
       !-----------------------------------------------------------------
@@ -671,6 +680,8 @@
 
                if (Tsf >= c0 .and. fsurfn < fcondtopn) then
                   converged = .false.
+                  print *, 'Not converged, condition 4'
+                  print *, 'Tsf, c0, fsurfn, fcondtopn: ', Tsf, c0, fsurfn, fcondtopn
                endif
 
                dTsf_prev = dTsf
